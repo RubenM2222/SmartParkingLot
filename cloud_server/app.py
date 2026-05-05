@@ -120,6 +120,21 @@ def painel():
                            ocupados=ocupados,
                            reservados=reservados)
 
+@app.route("/sensor", methods=["POST"])
+def sensor():
+    data = request.json
+    sensores = data["sensores"]
+
+    ocupados = sum(sensores)
+    livres = TOTAL_LUGARES - ocupados
+
+    return jsonify({
+        "ok": True,
+        "ocupados": ocupados,
+        "livres": livres,
+        "raw": sensores
+    })
+
 @app.route("/entrada", methods=["POST"])
 def entrada():
     data = request.json
