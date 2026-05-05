@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="3">
+<title>Smart Parking Lot</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f2f2f2;
+    text-align:center;
+}
+
+.card{
+    display:inline-block;
+    background:white;
+    padding:20px;
+    margin:10px;
+    border-radius:10px;
+    width:220px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+table{
+    margin:auto;
+    border-collapse:collapse;
+    width:70%;
+    background:white;
+}
+
+th,td{
+    padding:12px;
+    border:1px solid #ccc;
+}
+
+th{
+    background:#333;
+    color:white;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🚗 Smart Parking Lot</h1>
+
+<div class="card">
+<h2>Livres</h2>
+<h1>{{ livres }}</h1>
+</div>
+
+<div class="card">
+<h2>Ocupados</h2>
+<h1>{{ ocupados }}</h1>
+</div>
+
+<div class="card">
+<h2>Reservados</h2>
+<h1>{{ reservados }}</h1>
+</div>
+
+<h2>Veículos no Parque</h2>
+
+<table>
+<tr>
+<th>Matrícula</th>
+<th>Hora Entrada</th>
+<th>Tempo</th>
+<th>Preço</th>
+</tr>
+
+{% for carro in carros %}
+<tr>
+<td>{{ carro["matricula"] }}</td>
+<td>{{ carro["entrada"] }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</body>
+</html>

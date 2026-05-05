@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Cliente - Smart Parking</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f2f2f2;
+    text-align:center;
+}
+
+.card{
+    display:inline-block;
+    background:white;
+    padding:20px;
+    margin:10px;
+    border-radius:10px;
+    width:220px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input, button{
+    padding:10px;
+    margin:5px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🚗 Smart Parking - Cliente</h1>
+
+<div class="card">
+<h2>Livres</h2>
+<h1>{{ livres }}</h1>
+</div>
+
+<div class="card">
+<h2>Ocupados</h2>
+<h1>{{ ocupados }}</h1>
+</div>
+
+<hr>
+
+<h2>Reservar Lugar</h2>
+
+<input type="text" id="matricula" placeholder="Matrícula">
+<button onclick="reservar()">Reservar</button>
+
+<script>
+function reservar() {
+    const matricula = document.getElementById("matricula").value;
+
+    if (!matricula) {
+        alert("Insere matrícula");
+        return;
+    }
+
+    fetch("http://127.0.0.1:5000/reservar", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ matricula })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.msg);
+        location.reload();
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro na reserva");
+    });
+}
+</script>
+
+</body>
+</html>
