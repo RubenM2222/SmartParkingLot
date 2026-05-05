@@ -7,6 +7,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
 TOTAL_LUGARES = 10
+sensor_estado = [0] * TOTAL_LUGARES
 
 def db():
     conn = sqlite3.connect("parking.db")
@@ -122,17 +123,31 @@ def painel():
 
 @app.route("/sensor", methods=["POST"])
 def sensor():
+    global sensor_estado
+
     data = request.json
     sensores = data["sensores"]
+
+    sensor_estado = sensores
 
     ocupados = sum(sensores)
     livres = TOTAL_LUGARES - ocupados
 
     return jsonify({
         "ok": True,
-        "ocupados": ocupados,
-        "livres": livres,
-        "raw": sensores
+        "estado": sensor_estado
+    })
+    #return jsonify({
+    #    "ok": True,
+    #    "ocupados": ocupados,
+    #    "livres": livres,
+    #    "raw": sensores
+    #})
+
+@app.route("/api/sensores")
+def get_sensores():
+    return jsonify({
+        "estado": sensor_estado
     })
 
 @app.route("/entrada", methods=["POST"])
