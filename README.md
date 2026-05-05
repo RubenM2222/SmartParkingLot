@@ -14,7 +14,8 @@ pip3 install flask-cors
 
 ## ▶️ Executar o servidor
 
-python server.py  
+python server.py
+python app.py  
 
 ---
 
@@ -22,7 +23,9 @@ python server.py
 
 O Flask já serve o HTML, por isso não é necessário usar:
 
-python -m http.server 8000  
+python -m http.server 8000 
+
+Usar /admin?key=admin123 para aceder ao dashboard admin
 
 ---
 
