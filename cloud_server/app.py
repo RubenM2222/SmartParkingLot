@@ -100,6 +100,26 @@ def dashboard():
                            reservados=reservados,
                            carros=carros)
 
+@app.route("/painel")
+def painel():
+    conn = db()
+    c = conn.cursor()
+
+    c.execute("SELECT COUNT(*) FROM carros WHERE ativo=1")
+    ocupados = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM reservas WHERE ativo=1")
+    reservados = c.fetchone()[0]
+
+    livres = TOTAL_LUGARES - ocupados - reservados
+
+    conn.close()
+
+    return render_template("painel.html",
+                           livres=livres,
+                           ocupados=ocupados,
+                           reservados=reservados)
+
 @app.route("/entrada", methods=["POST"])
 def entrada():
     data = request.json

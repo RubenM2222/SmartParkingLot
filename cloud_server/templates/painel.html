@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="2">
+<title>Painel LED</title>
+
+<style>
+body{
+    background:black;
+    color:#00ff00;
+    font-family: monospace;
+    text-align:center;
+}
+
+.container{
+    margin-top:100px;
+}
+
+.numero{
+    font-size:100px;
+}
+
+.label{
+    font-size:30px;
+    margin-top:20px;
+}
+
+.numero{
+    font-size:100px;
+    animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+    from { opacity: 1; }
+    to { opacity: 0.6; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="label">VAGAS LIVRES</div>
+<div class="numero">{{ livres }}</div>
+
+<div class="label">OCUPADOS</div>
+<div class="numero" style="color:red">{{ ocupados }}</div>
+
+<div class="label">RESERVADOS</div>
+<div class="numero" style="color:yellow">{{ reservados }}</div>
+
+</div>
+
+</body>
+</html>

@@ -75,6 +75,15 @@ function reservar() {
         alert("Erro na reserva");
     });
 }
+function atualizar(){
+    fetch("/estado")
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("livres").innerText = data.livres;
+    });
+}
+
+setInterval(atualizar, 2000);
 </script>
 
 </body>
