@@ -26,7 +26,8 @@ def init():
         saida TEXT,
         preco REAL,
         tempo INTEGER,
-        ativo INTEGER
+        ativo INTEGER,
+        pago TEXT
     )
     ''')
 
@@ -322,6 +323,96 @@ def reservar():
     return jsonify({
         "ok": True,
         "msg": "Reserva criada (2 min)"
+    })
+
+@app.route("/payment")
+def payment():
+    matricula = request.args.get("matricula")
+    
+    if not matricula:
+        return "Erro: Matrícula não fornecida na URL (ex: /payment?matricula=AA-11-BB)", 400
+
+    conn = db()
+    c = conn.cursor()
+
+    # Procurar o carro ativo com esta matrícula
+    c.execute("""
+        SELECT * FROM carros
+        WHERE matricula=? AND ativo=0 AND pago IS NULL
+        ORDER BY entrada DESC LIMIT 1
+    """, (matricula,))
+
+    carro = c.fetchone()
+    conn.close()
+
+    if not carro:
+        return f"Erro: Não foi encontrado nenhum veículo ativo com a matrícula {matricula}", 404
+
+    # Calcular o tempo decorrido até agora
+    agora = datetime.now()
+    entrada_dt = datetime.strptime(carro["entrada"], "%Y-%m-%d %H:%M:%S")
+    tempo_min = int((agora - entrada_dt).total_seconds() / 60)
+
+    # Regra de preço (mesma lógica usada na rota /saida)
+    preco = max(1.0, tempo_min * 0.05)  # Mínimo de 1€
+
+    # Formatar a duração para ser mais legível no ecrã
+    horas = tempo_min // 60
+    minutos = tempo_min % 60
+    duracao_formatada = f"{horas}h {minutos}m" if horas > 0 else f"{minutos} min"
+
+    # Renderizar o template passando as variáveis do Python
+    return render_template(
+        "payment.html",
+        matricula=carro["matricula"],
+        entrada=carro["entrada"],
+        saida=carro["saida"],
+        duracao=duracao_formatada,
+        preco=f"{preco:.2f}"
+    )
+
+@app.route("/confirmar_pagamento", methods=["POST"])
+def confirmar():
+    # Se estás a enviar via formulário/URL, usa args. Se for JSON, usa request.json
+    matricula = request.args.get("matricula")
+    
+    if not matricula:
+        return jsonify({"ok": False, "msg": "Matrícula não fornecida"}), 400
+
+    # Gerar a data e hora do pagamento agora
+    agora_pagamento = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    conn = db()
+    c = conn.cursor()
+
+    # 1. Verificar se existe um registo que precise de pagamento
+    # Procuro o último registo desta matrícula (mesmo que já tenha saído, mas não pago)
+    c.execute("""
+        SELECT id FROM carros
+        WHERE matricula=? AND pago IS NULL
+        ORDER BY entrada DESC LIMIT 1
+    """, (matricula,))
+
+    carro = c.fetchone()
+
+    if not carro:
+        conn.close()
+        return jsonify({"ok": False, "msg": "Nenhum pagamento pendente para esta matrícula"}), 404
+
+    # 2. Atualizar com a DATA do pagamento
+    c.execute("""
+        UPDATE carros 
+        SET pago = ? 
+        WHERE id = ?
+    """, (agora_pagamento, carro["id"]))
+    
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "ok": True, 
+        "msg": "Pagamento confirmado", 
+        "data_pagamento": agora_pagamento
     })
 
 def limpar_reservas():
