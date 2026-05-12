@@ -49,7 +49,7 @@ function enviar() {
     const formData = new FormData();
     formData.append('image', file);
 
-    fetch('http://127.0.0.1:5001/ocr', {
+    fetch('http://10.52.135.140:5001/ocr', {
         method: 'POST',
         body: formData
     })
@@ -94,7 +94,7 @@ function saida() {
     const formData = new FormData();
     formData.append('image', file);
 
-    fetch('http://127.0.0.1:5001/ocr', {
+    fetch('http://10.52.135.140:5001/ocr', {
         method: 'POST',
         body: formData
     })
@@ -140,7 +140,7 @@ function reservar() {
         return;
     }
 
-    fetch("http://127.0.0.1:5000/reservar", {
+    fetch("http://10.52.135.140/reservar", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

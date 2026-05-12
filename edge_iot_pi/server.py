@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 #pytesseract.pytesseract.tesseract_cmd = r'C:\Users\2222068\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
-pytesseract.pytesseract.tesseract_cmd = r'C:\Users\2222068\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\ruben\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 print(pytesseract.get_tesseract_version())
 
 @app.route("/")
@@ -19,26 +19,47 @@ def home():
 
 @app.route('/ocr', methods=['POST'])
 def ocr():
-
     if 'image' not in request.files:
-        return jsonify({'erro':'imagem não enviada'}),400
+        return jsonify({'erro':'imagem não enviada'}), 400
 
     file = request.files['image']
-
     npimg = np.frombuffer(file.read(), np.uint8)
     img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
 
+    # 1. REDIMENSIONAR (Crucial para fotos de telemóvel)
+    # Se a imagem for gigante, o Tesseract "afoga-se". Vamos normalizar.
+    max_dimension = 1200
+    height, width = img.shape[:2]
+    if width > max_dimension or height > max_dimension:
+        scaling_factor = max_dimension / float(max(width, height))
+        img = cv2.resize(img, None, fx=scaling_factor, fy=scaling_factor, interpolation=cv2.INTER_AREA)
+
+    # 2. CONVERTER PARA CINZA
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray,150,255,cv2.THRESH_BINARY)
 
-    config='--oem 3 --psm 7 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    # 3. TRATAMENTO DE LUZ (Denoising e Contraste)
+    # Remove o "grão" da foto sem borrar as letras
+    gray = cv2.bilateralFilter(gray, 11, 17, 17) 
 
+    # 4. THRESHOLD ADAPTATIVO (O segredo do sucesso)
+    # Em vez de usar 150, ele analisa a luz de cada pedaço da foto individualmente.
+    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                   cv2.THRESH_BINARY, 11, 2)
+
+    # 6. OCR
+    config = '--oem 3 --psm 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     texto = pytesseract.image_to_string(thresh, config=config)
 
+    # Limpeza de caracteres
     texto = re.sub(r'[^A-Z0-9]', '', texto.upper())
 
     if len(texto) < 5:
-        return jsonify({"erro":"matricula invalida"})
+        # Enviamos as chaves que o JS espera, mas com aviso de erro
+        return jsonify({
+            "matricula": texto if texto else "Não lida", 
+            "servidor": {"erro": "Matrícula inválida ou muito curta"},
+            "erro": "Falha no OCR"
+        })
 
     #resposta = requests.post(
     #    "http://192.168.88.243:5000/entrada",
