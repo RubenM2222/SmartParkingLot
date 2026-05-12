@@ -88,10 +88,26 @@
     </style>
 </head>
 <body>
+<div class="card">
 
-    <div class="card">
+    {% if vazio %}
+
+        <h2>Aguardando veículo</h2>
+
+        {% if erro %}
+            <p style="color:red; text-align:center;">
+                {{ erro }}
+            </p>
+        {% else %}
+            <p style="text-align:center; color:#666;">
+                Envie uma matrícula para iniciar o pagamento.
+            </p>
+        {% endif %}
+
+    {% else %}
+
         <h2>Resumo do Pagamento</h2>
-        
+
         <div class="info-group">
             <span class="info-label">Matrícula</span>
             <span class="info-value" id="matricula">{{ matricula }}</span>
@@ -117,7 +133,13 @@
             <span class="info-value price-highlight">{{ preco }} €</span>
         </div>
 
-        <button class="btn-pagar" onclick="processarPagamento()">Pagar Agora</button>
+        <button class="btn-pagar" onclick="processarPagamento()">
+            Pagar Agora
+        </button>
+
+    {% endif %}
+
+</div>
     </div>
 
     <script>
