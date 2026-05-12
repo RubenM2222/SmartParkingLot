@@ -356,8 +356,15 @@ def reservar():
 def payment():
     matricula = request.args.get("matricula")
     
+    #if not matricula:
+    #    return "Erro: Matrícula não fornecida na URL (ex: /payment?matricula=AA-11-BB)", 400
+
+    # Se ainda não houver matrícula
     if not matricula:
-        return "Erro: Matrícula não fornecida na URL (ex: /payment?matricula=AA-11-BB)", 400
+        return render_template(
+            "payment.html",
+            vazio=True
+        )
 
     conn = db()
     c = conn.cursor()
