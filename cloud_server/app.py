@@ -150,6 +150,33 @@ def get_sensores():
         "estado": sensor_estado
     })
 
+@app.route("/api/estado_real")
+def estado_real():
+    conn = db()
+    c = conn.cursor()
+
+    sensores = [0] * TOTAL_LUGARES
+
+    # carros ocupam lugares
+    c.execute("SELECT COUNT(*) FROM carros WHERE ativo=1")
+    ocupados = c.fetchone()[0]
+
+    # reservas também contam como ocupação virtual
+    c.execute("SELECT COUNT(*) FROM reservas WHERE ativo=1")
+    reservados = c.fetchone()[0]
+
+    total_ocupados = ocupados + reservados
+
+    for i in range(min(total_ocupados, TOTAL_LUGARES)):
+        sensores[i] = 1
+
+    conn.close()
+
+    return jsonify({
+        "sensores": sensores,
+        "ocupados": total_ocupados
+    })
+
 @app.route("/entrada", methods=["POST"])
 def entrada():
     data = request.json

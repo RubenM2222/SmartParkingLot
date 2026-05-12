@@ -1,14 +1,20 @@
+<h3>Camera Entrada/Saida</h3>
+ <input
+    type="file"
+    accept="image/*"
+    capture="environment"
+    id="camera">
+<hr>
 <h3>Entrada de veículo</h3>
-
-<input type="file" accept="image/*" capture="camera" id="camera">
+<!-- <input type="file" accept="image/*" capture="camera" id="camera"> -->
 <input type="file" accept="image/*" id="imagem">
 <button onclick="enviar()">Enviar</button>
 <hr>
 
 <h3>Saída de veículo</h3>
 
-<!-- <input type="text" id="matriculaSaida" placeholder="Matrícula">-->
-<input type="file" accept="image/*" capture="camera" id="saidaCamera">
+<!-- <input type="text" id="matriculaSaida" placeholder="Matrícula">
+<input type="file" accept="image/*" capture="camera" id="saidaCamera"> -->
 <input type="file" accept="image/*" id="saidaImagem">
 <button onclick="saida()">Registar saída</button>
 
@@ -73,7 +79,7 @@ function enviar() {
     //});
 }
 function saida() {
-    const inputCamera = document.getElementById('saidaCamera');
+    const inputCamera = document.getElementById('camera');
     const inputFile = document.getElementById('saidaImagem');
 
     const input = inputCamera.files.length ? inputCamera : inputFile;

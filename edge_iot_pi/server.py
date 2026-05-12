@@ -9,6 +9,7 @@ import re
 app = Flask(__name__)
 CORS(app)
 
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Users\2222068\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 pytesseract.pytesseract.tesseract_cmd = r'C:\Users\2222068\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 print(pytesseract.get_tesseract_version())
 
