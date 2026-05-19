@@ -339,6 +339,21 @@ def entrada(parque_id):
             "ok": False,
             "msg": "Veículo já está dentro do parque"
         }), 409
+    
+    # impedir nova entrada enquanto houver saída pendente de pagamento
+    c.execute("""
+        SELECT id FROM carros
+        WHERE matricula=? AND ativo=0 AND pago IS NULL
+        ORDER BY entrada DESC LIMIT 1
+    """, (matricula,))
+    pendente = c.fetchone()
+
+    if pendente:
+        conn.close()
+        return jsonify({
+            "ok": False,
+            "msg": "Entrada recusada: pagamento pendente da saída anterior"
+        })
 
     # verificar reserva ativa
     c.execute("""
