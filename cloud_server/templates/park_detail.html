@@ -1,0 +1,59 @@
+<h1>Park Admin Dashboard</h1>
+
+<hr>
+
+<h2>Os teus parques</h2>
+
+<ul>
+{% for p in parques %}
+    <li>
+        <b>{{ p.nome }}</b>
+        | Capacidade: {{ p.capacidade }}
+
+        <a href="/admin/park/{{ p.id }}">
+            Abrir
+        </a>
+    </li>
+{% endfor %}
+</ul>
+
+<hr>
+
+<a href="/logout">
+    <button>Logout</button>
+</a>
+
+<h1>Parque: {{ parque.nome }}</h1>
+
+<p>Capacidade: {{ parque.capacidade }}</p>
+<p>Ocupados: {{ ocupados }}</p>
+
+<hr>
+
+<h2>Carros dentro do parque</h2>
+
+<ul>
+{% for c in carros %}
+    <li>
+        {{ c.matricula }} | entrada: {{ c.entrada }}
+    </li>
+{% endfor %}
+</ul>
+
+<hr>
+
+<h2>Reservas ativas</h2>
+
+<ul>
+{% for r in reservas %}
+    <li>
+        {{ r.matricula }} | expira: {{ r.expira }}
+    </li>
+{% endfor %}
+</ul>
+
+<hr>
+
+<a href="/admin/park">
+    Voltar
+</a>

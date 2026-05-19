@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="10">
+    <title>Smart Parking Lot - Admin</title>
+
+    <style>
+    body{
+        font-family: Arial;
+        background:#f2f2f2;
+        text-align:center;
+    }
+
+    .card{
+        display:inline-block;
+        background:white;
+        padding:20px;
+        margin:10px;
+        border-radius:10px;
+        width:220px;
+        box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
+
+    table{
+        margin:auto;
+        border-collapse:collapse;
+        width:70%;
+        background:white;
+    }
+
+    th,td{
+        padding:12px;
+        border:1px solid #ccc;
+    }
+
+    th{
+        background:#333;
+        color:white;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(5, 80px);
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .lugar {
+        width: 80px;
+        height: 80px;
+        font-size: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        font-weight: bold;
+    }
+
+    .livre {
+        background: #2ecc71;
+        color: white;
+    }
+
+    .ocupado {
+        background: #e74c3c;
+        color: white;
+    }
+    </style>
+</head>
+
+<body>
+
+    <h1>🚗 Smart Parking Lot</h1>
+    <!-- Cards Estado -->
+    <div class="card">
+    <h2>Livres</h2>
+    <h1>{{ livres }}</h1>
+    </div>
+
+    <div class="card">
+    <h2>Ocupados</h2>
+    <h1>{{ ocupados }}</h1>
+    </div>
+
+    <div class="card">
+    <h2>Reservados</h2>
+    <h1>{{ reservados }}</h1>
+    </div>
+
+    <h2>Veículos no Parque</h2>
+    <!-- tabela -->
+    <table>
+    <tr>
+    <th>Matrícula</th>
+    <th>Hora Entrada</th>
+    <th>Tempo</th>
+    <th>Preço</th>
+    </tr>
+
+    {% for carro in carros %}
+    <tr>
+    <td>{{ carro["matricula"] }}</td>
+    <td>{{ carro["entrada"] }}</td>
+    </tr>
+    {% endfor %}
+
+    </table>
+    <!-- Grid de ocupaçao -->
+    <hr>
+
+    <h2>Sensores IoT (Simulação)</h2>
+
+    <div id="grid" class="grid"></div>
+    <script>
+        async function atualizarSensores() {
+            try {
+                const res = await fetch("/api/sensores");
+                const data = await res.json();
+
+                const grid = document.getElementById("grid");
+                grid.innerHTML = "";
+
+                data.estado.forEach((v) => {
+                    const div = document.createElement("div");
+                    div.classList.add("lugar");
+
+                    if (v === 1) {
+                        div.classList.add("ocupado");
+                        div.innerHTML = "🚗";
+                    } else {
+                        div.classList.add("livre");
+                        div.innerHTML = "🅿️";
+                    }
+
+                    grid.appendChild(div);
+                });
+
+            } catch (e) {
+                console.error("Erro sensores:", e);
+            }
+        }
+
+        setInterval(atualizarSensores, 1000);
+        atualizarSensores();
+    </script>
+</body>
+</html>

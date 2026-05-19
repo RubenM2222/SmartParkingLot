@@ -1,0 +1,176 @@
+<h1>Server Admin Dashboard</h1>
+
+<hr>
+
+<h2>Parques</h2>
+
+<ul>
+{% for p in parques %}
+    <li>
+        <b>{{ p.nome }}</b>
+        | ID: {{ p.id }}
+        | Capacidade: {{ p.capacidade }}
+
+        <button class="btn-remove" data-id="{{ p.id }}">
+            Remover
+        </button>
+    </li>
+{% endfor %}
+</ul>
+
+<hr>
+
+<h2>Park Admins</h2>
+
+<ul>
+{% for a in admins %}
+    <li>
+        <b>{{ a.username }}</b>
+        | ID: {{ a.id }}
+
+        <input id="park_{{ a.id }}" placeholder="Parque ID">
+        
+        <button class="btn-unassign" data-id="{{ a.id }}">
+            Desassociar de parque
+        </button>
+    </li>
+{% endfor %}
+</ul>
+
+<hr>
+
+<h2>Criar Parque</h2>
+
+<input id="nome" placeholder="Nome">
+<input id="capacidade" type="number" placeholder="Capacidade">
+<button onclick="criarParque()">Criar Parque</button>
+
+<hr>
+
+<h2>Associar Admin a Parque</h2>
+
+<input id="admin_id" placeholder="Admin ID">
+<input id="parque_id" placeholder="Parque ID">
+<button onclick="associarAdmin()">Associar</button>
+
+<hr>
+
+<button onclick="logout()">Logout</button>
+
+<script>
+/* =========================
+   PARQUES
+========================= */
+
+function criarParque() {
+
+    const nome = document.getElementById("nome").value;
+    const capacidade = document.getElementById("capacidade").value;
+
+    fetch("/admin/parques/criar", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            nome: nome,
+            capacidade: capacidade
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            location.reload();
+        } else {
+            alert("Erro ao criar parque");
+        }
+    });
+}
+
+/* =========================
+   ADMIN ↔ PARQUE
+========================= */
+
+function associarAdmin() {
+
+    const admin_id = document.getElementById("admin_id").value;
+    const parque_id = document.getElementById("parque_id").value;
+
+    fetch("/admin/assign", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            admin_id: admin_id,
+            parque_id: parque_id
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            alert("Admin associado com sucesso");
+        } else {
+            alert("Erro ao associar");
+        }
+    });
+}
+
+
+/* =========================
+   AUTH
+========================= */
+
+function logout() {
+    fetch("/logout")
+    .then(() => {
+        window.location.href = "/login";
+    });
+}
+/* ###################*/
+document.addEventListener("DOMContentLoaded", function () {
+
+    /* =========================
+       REMOVER PARQUE
+    ========================= */
+    document.querySelectorAll(".btn-remove").forEach(btn => {
+        btn.addEventListener("click", function () {
+
+            const id = this.dataset.id;
+
+            if (!confirm("Tens a certeza?")) return;
+
+            fetch(`/admin/parques/remover/${id}`, {
+                method: "POST"
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) location.reload();
+                else alert("Erro ao remover parque");
+            });
+        });
+    });
+
+    /* =========================
+       DESASSOCIAR ADMIN
+    ========================= */
+    document.querySelectorAll(".btn-unassign").forEach(btn => {
+        btn.addEventListener("click", function () {
+
+            const admin_id = this.dataset.id;
+            const parque_id = document.getElementById("park_" + admin_id).value;
+
+            fetch("/admin/unassign", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    admin_id,
+                    parque_id
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) alert("Desassociado");
+                else alert("Erro");
+            });
+        });
+    });
+
+});
+</script>
