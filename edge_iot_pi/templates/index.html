@@ -27,6 +27,11 @@
 -->
 
 <script>
+// Obter o IP/hostname do servidor dinâmicamente
+const SERVER_HOST = window.location.hostname;
+const OCR_SERVER = `http://${SERVER_HOST}:5001`;
+const PARKING_SERVER = `http://${SERVER_HOST}:5000`;
+
 function enviar() {
     //Usar camera
     //const input = document.getElementById('camera');
@@ -49,24 +54,27 @@ function enviar() {
     const formData = new FormData();
     formData.append('image', file);
 
-    fetch('http://10.52.135.140:5001/ocr', {
+    fetch(`${OCR_SERVER}/ocr?tipo=entrada`, {
         method: 'POST',
         body: formData
     })
-    .then(async res => {
-    const text = await res.text();
-    console.log("Resposta crua:", text);
+    .then(res => res.json())
+    .then(data => {
+        console.log("Resposta crua:", data);
 
-    try {
-        const data = JSON.parse(text);
-        //alert("Texto: " + data.texto);
+        if (data.servidor && data.servidor.erro) {
+            alert("Erro OCR/Cloud: " + data.servidor.erro);
+            return;
+        }
+
         alert(
-        "Matricula: " + data.matricula +
-        "\nServidor: " + JSON.stringify(data.servidor)
+            "Matricula: " + data.matricula +
+            "\nServidor: " + JSON.stringify(data.servidor)
         );
-    } catch (e) {
-        alert("Resposta não é JSON:\n" + text);
-    }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro ao enviar entrada: " + err.message);
     });
     //.then(res => res.json())
     //.then(res => res.text()) 
@@ -94,42 +102,36 @@ function saida() {
     const formData = new FormData();
     formData.append('image', file);
 
-    fetch('http://10.52.135.140:5001/ocr', {
+    fetch(`${OCR_SERVER}/ocr?tipo=saida`, {
         method: 'POST',
         body: formData
     })
-    .then(async res => {
-        const text = await res.text();
-        console.log("Resposta crua:", text);
-
-        try {
-            const data = JSON.parse(text);
-
-            // agora envia para o backend de saída
-            return fetch("http://127.0.0.1:5000/saida", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    matricula: data.matricula
-                })
-            });
-        } catch (e) {
-            alert("Não foi possível reconhecer a matrícula na imagem");
-        }
-    })
     .then(res => res.json())
     .then(data => {
+        console.log("Resposta crua:", data);
+
+        if (data.servidor && data.servidor.erro) {
+            throw new Error("Erro OCR/Cloud: " + data.servidor.erro);
+        }
+
+        if (!data.matricula) {
+            throw new Error("Matrícula não detectada na imagem.");
+        }
+
+        const resultado = data.servidor || {};
+        if (!resultado.ok) {
+            throw new Error(resultado.msg || "Erro na saída do servidor.");
+        }
+
         alert(
-            data.msg +
-            "\nTempo: " + data.tempo_min + " min" +
-            "\nPreço: " + data.preco + " €"
+            resultado.msg +
+            "\nTempo: " + resultado.tempo_min + " min" +
+            "\nPreço: " + resultado.preco + " €"
         );
     })
     .catch(err => {
         console.error(err);
-        alert("Erro na saída");
+        alert("Erro na saída: " + err.message);
     });
 }
 function reservar() {
@@ -140,7 +142,7 @@ function reservar() {
         return;
     }
 
-    fetch("http://10.52.135.140/reservar", {
+    fetch(`${OCR_SERVER}/reservar`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

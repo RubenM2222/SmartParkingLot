@@ -340,7 +340,7 @@ def entrada(parque_id):
             "msg": "Veículo já está dentro do parque"
         }), 409
 
-    # 2. VERIFICAR RESERVA ATIVA NESTE PARQUE
+    # verificar reserva ativa
     c.execute("""
         SELECT id FROM reservas
         WHERE matricula = ?
@@ -464,17 +464,9 @@ def saida(parque_id):
     # 4. fechar registo corretamente
     c.execute("""
         UPDATE carros
-        SET saida = ?,
-            ativo = 0,
-            tempo = ?,
-            preco = ?
-        WHERE id = ?
-    """, (
-        agora_str,
-        tempo_min,
-        round(preco, 2),
-        carro["id"]
-    ))
+        SET saida=?, ativo=0
+        WHERE matricula=? AND ativo=1
+    """, (agora_str, matricula))
 
     conn.commit()
     conn.close()
