@@ -114,10 +114,83 @@ def init():
         FOREIGN KEY(carro_id) REFERENCES carros(id)
     )
     ''')
-    c.execute('''
-            INSERT INTO utilizadores (nome, username, password, tipo)
+    
+    # =========================
+    # ADMIN DEFAULT
+    # =========================
+
+    c.execute("""
+        SELECT id
+        FROM utilizadores
+        WHERE username = ?
+    """, ("AdminS",))
+
+    admin = c.fetchone()
+
+    if not admin:
+
+        c.execute("""
+            INSERT INTO utilizadores (
+                nome,
+                username,
+                password,
+                tipo
+            )
             VALUES (?, ?, ?, ?)
-        ''', ("Ben", "AdminS", "123", 'server_admin'))
+        """, (
+            "Ben",
+            "AdminS",
+            "123",
+            "server_admin"
+    ))
+
+    # =========================
+    # PARQUES DEFAULT
+    # =========================
+
+    c.execute("""
+        SELECT id
+        FROM parques
+        WHERE nome = ?
+    """, ("Parque Central",))
+
+    if not c.fetchone():
+
+        c.execute("""
+            INSERT INTO parques (
+                nome,
+                localizacao,
+                capacidade
+            )
+            VALUES (?, ?, ?)
+        """, (
+            "Parque Central",
+            "Leiria",
+            50
+    ))
+
+
+    c.execute("""
+        SELECT id
+        FROM parques
+        WHERE nome = ?
+    """, ("Parque Shopping",))
+
+    if not c.fetchone():
+
+        c.execute("""
+            INSERT INTO parques (
+                nome,
+                localizacao,
+                capacidade
+            )
+            VALUES (?, ?, ?)
+        """, (
+            "Parque Shopping",
+            "Porto",
+            30
+    ))
+
     # INDEXs
     # carros
     c.execute('''

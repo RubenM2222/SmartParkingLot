@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template
 from .database import db
+import sqlite3
 
 client_bp = Blueprint("client", __name__)
 
@@ -7,8 +8,32 @@ client_bp = Blueprint("client", __name__)
 # =========================
 # PAGINA CLIENTE
 # =========================
+@client_bp.route("/")
+def home():
+
+    conn = db()
+    conn.row_factory = sqlite3.Row
+
+    c = conn.cursor()
+
+    # obter todos os parques
+    c.execute("""
+        SELECT *
+        FROM parques
+    """)
+
+    parques = c.fetchall()
+
+    conn.close()
+
+    return render_template(
+        "home.html",
+        parques=parques
+    )
+
 @client_bp.route("/parque/<int:parque_id>")
 def cliente(parque_id):
+
 
     conn = db()
     c = conn.cursor()
