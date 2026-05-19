@@ -180,3 +180,5 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 cloud_server/parking.db
+.vscode
+.db
