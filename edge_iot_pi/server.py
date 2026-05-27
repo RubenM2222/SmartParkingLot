@@ -3,14 +3,13 @@ from flask_cors import CORS
 import pytesseract
 import cv2
 import numpy as np
-import requests
-import re
+import requests, socket, re
 
 app = Flask(__name__)
 CORS(app)
 
-#pytesseract.pytesseract.tesseract_cmd = r'C:\Users\2222068\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
-pytesseract.pytesseract.tesseract_cmd = r'C:\Users\ruben\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\2222068\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Users\ruben\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 print(pytesseract.get_tesseract_version())
 
 @app.route("/")
@@ -67,12 +66,21 @@ def ocr():
     #)
     tipo = request.args.get("tipo", "entrada")
 
-    url = "http://127.0.0.1:5000/entrada" if tipo == "entrada" else "http://127.0.0.1:5000/saida"
+    #url = "http://127.0.0.1:5000/entrada" if tipo == "entrada" else "http://127.0.0.1:5000/saida"
 
+    parque_id = get_parque_id()
+    if not parque_id:
+        parque_id = request.args.get("parque_id", type=int)
+
+    if not parque_id:
+        return jsonify({
+        "erro": "Parque não identificado (hostname inválido e sem fallback)"
+        }), 400
     #resposta = requests.post(
     #    url,
     #    json={"matricula": texto}
     #)
+    url = f"http://127.0.0.1:5000/{tipo}/{parque_id}"
     try:
         resposta = requests.post(url, json={"matricula": texto}, timeout=3)
         try:
@@ -90,5 +98,14 @@ def ocr():
         "matricula": texto,
         "servidor": cloud_data
     })
+
+def get_parque_id():
+    hostname = socket.gethostname()
+
+    match = re.search(r'parking(\d+)', hostname)
+    if match:
+        return int(match.group(1))
+
+    return None
 
 app.run(host='0.0.0.0', port=5001)

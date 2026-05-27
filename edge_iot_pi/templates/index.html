@@ -17,7 +17,10 @@
 <input type="file" accept="image/*" capture="camera" id="saidaCamera"> -->
 <input type="file" accept="image/*" id="saidaImagem">
 <button onclick="saida()">Registar saída</button>
+<hr>
 
+<h3>Parque (fallback)</h3>
+<input type="number" id="parque_id" placeholder="ID do parque">
 <!--
 <hr>
 <h3>Reservar lugar</h3>
@@ -42,19 +45,20 @@ function enviar() {
     //Usar camera ou ficheiros
     const inputCamera = document.getElementById('camera');
     const inputFile = document.getElementById('imagem');
+    const parqueId = document.getElementById("parque_id").value;
 
     const input = inputCamera.files.length ? inputCamera : inputFile;
     if (input.files.length === 0) {
         alert("Escolhe uma imagem primeiro!");
         return;
     }
-
+    
     const file = input.files[0];
 
     const formData = new FormData();
     formData.append('image', file);
 
-    fetch(`${OCR_SERVER}/ocr?tipo=entrada`, {
+    fetch(`${OCR_SERVER}/ocr?tipo=entrada&parque_id=${parqueId}`, {
         method: 'POST',
         body: formData
     })
@@ -89,6 +93,7 @@ function enviar() {
 function saida() {
     const inputCamera = document.getElementById('camera');
     const inputFile = document.getElementById('saidaImagem');
+    const parqueId = document.getElementById("parque_id").value;
 
     const input = inputCamera.files.length ? inputCamera : inputFile;
 
@@ -102,7 +107,7 @@ function saida() {
     const formData = new FormData();
     formData.append('image', file);
 
-    fetch(`${OCR_SERVER}/ocr?tipo=saida`, {
+    fetch(`${OCR_SERVER}/ocr?tipo=saida&parque_id=${parqueId}`, {
         method: 'POST',
         body: formData
     })
