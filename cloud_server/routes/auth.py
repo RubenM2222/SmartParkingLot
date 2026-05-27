@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, session, render_template
 from .database import db
+from functools import wraps
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -30,3 +31,33 @@ def login():
     session["tipo"] = user["tipo"]
 
     return jsonify({"ok": True, "tipo": user["tipo"]})
+
+@auth_bp.route("/logout", methods=["GET"])
+def logout():
+    session.clear()
+    return redirect(url_for("auth.login_page"))
+
+def login_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("auth.login_page"))
+        return f(*args, **kwargs)
+    return wrapper
+#def login_required(f):
+#    @wraps(f)
+#    def decorated_function(*args, **kwargs):
+#
+#        if "user_id" not in session:
+#            return redirect(url_for("auth.login_page"))
+#
+#        response = make_response(f(*args, **kwargs))
+#
+#        # 🚫 impedir cache do browser
+#        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+#        response.headers["Pragma"] = "no-cache"
+#        response.headers["Expires"] = "0"
+#
+#        return response
+#
+#    return decorated_function

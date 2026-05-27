@@ -1,6 +1,7 @@
 import sqlite3
 from flask import Blueprint, request, jsonify, render_template
 from .database import db
+from .auth import login_required
 
 admin_server_bp = Blueprint("admin_server", __name__)
 
@@ -9,6 +10,7 @@ admin_server_bp = Blueprint("admin_server", __name__)
 # DASHBOARD SERVER ADMIN
 # =========================
 @admin_server_bp.route("/admin/server")
+@login_required
 def admin_server():
 
     conn = db()

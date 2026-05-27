@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session
 import sqlite3
 from .database import db
+from .auth import login_required
 
 admin_park_bp = Blueprint("admin_park", __name__)
 

@@ -16,6 +16,13 @@ CORS(app, supports_credentials=True)
 
 app.secret_key = "123"
 
+@app.after_request
+def no_cache(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 app.register_blueprint(auth_bp)
 app.register_blueprint(parking_bp)
 app.register_blueprint(payment_bp)
