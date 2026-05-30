@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+import threading
 
 from routes.auth import auth_bp
 from routes.parking import parking_bp
@@ -9,6 +10,7 @@ from routes.admin_server import admin_server_bp
 from routes.client import client_bp
 #from routes.sensors import sensor_bp
 from routes.database import init
+from scheduler import limpeza_automatica
 
 app = Flask(__name__)
 
@@ -34,4 +36,9 @@ app.register_blueprint(client_bp)
 init()
 
 if __name__ == "__main__":
+    
+    threading.Thread(
+        target=limpeza_automatica,
+        daemon=True
+    ).start()
     app.run(host="0.0.0.0", port=5000)
