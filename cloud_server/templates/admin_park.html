@@ -112,7 +112,16 @@
     <h2>Sensores IoT (Simulação)</h2>
 
     <div id="grid" class="grid"></div>
+    <button class="btn-logout" onclick="logout()">
+        Logout
+    </button>
     <script>
+        function logout() {
+            fetch("/logout")
+            .then(() => {
+                window.location.href = "/login";
+            });
+        }
         async function atualizarSensores() {
             try {
                 const res = await fetch("/api/sensores");
