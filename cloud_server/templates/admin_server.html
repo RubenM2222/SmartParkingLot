@@ -201,9 +201,8 @@ button{
                         </td>
 
                         <td>
-                            <button
-                                class="btn-remove btn-danger"
-                                data-id="{{ p.id }}">
+                            <button onclick="removerParque({{ p.id }})"
+                                    class="btn-danger">
                                 Remover
                             </button>
                         </td>
@@ -226,8 +225,8 @@ button{
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Nome</th>
                         <th>Username</th>
-                        <th>Parque</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -235,35 +234,60 @@ button{
                 <tbody>
 
                 {% for a in admins %}
-
                     <tr>
 
                         <td>{{ a.id }}</td>
+                        <td>{{ a.nome }}</td>
                         <td>{{ a.username }}</td>
 
                         <td>
-                            {% if a.parque_nome %}
-                                {{ a.parque_nome }}
-                            {% else %}
-                                Sem parque
-                            {% endif %}
-                        </td>
-
-                        <td>
-
-                            {% if a.parque_id %}
-                            <button
-                                class="btn-unassign btn-warning"
-                                data-id="{{ a.id }}"
-                                data-parque="{{ a.parque_id }}">
-                                Desassociar
-                            </button>
-                            {% endif %}
 
                             <button
                                 onclick="removerAdmin({{ a.id }})"
                                 class="btn-danger">
                                 Remover
+                            </button>
+
+                        </td>
+
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+        <div class="card">
+
+            <h3>Associações Admin ↔ Parque</h3>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Admin</th>
+                        <th>Parque</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for r in associacoes %}
+
+                    <tr>
+
+                        <td>{{ r.username }}</td>
+
+                        <td>{{ r.parque_nome }}</td>
+
+                        <td>
+
+                            <button
+                                onclick="desassociarAdmin({{ r.admin_id }}, {{ r.parque_id }})"
+                                class="btn-warning">
+                                Desassociar
                             </button>
 
                         </td>
@@ -513,6 +537,65 @@ function logout() {
     fetch("/logout")
     .then(() => {
         window.location.href = "/login";
+    });
+}
+
+
+function removerParque(id) {
+
+    if (!confirm("Tem a certeza que pretende remover este parque?")) {
+        return;
+    }
+
+    fetch(`/admin/parques/remover/${id}`, {
+        method: "POST"
+    })
+    .then(r => r.json())
+    .then(data => {
+
+        if (data.ok) {
+            location.reload();
+        } else {
+            alert("Erro ao remover parque");
+        }
+
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro de comunicação");
+    });
+}
+
+function desassociarAdmin(admin_id, parque_id) {
+
+    if (!confirm("Tem a certeza que pretende desassociar este administrador?")) {
+        return;
+    }
+
+    fetch("/admin/unassign", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            admin_id: admin_id,
+            parque_id: parque_id
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+
+        if (data.ok) {
+            alert("Administrador desassociado");
+            location.reload();
+        } else {
+            alert(data.msg || "Erro ao desassociar");
+        }
+
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro de comunicação");
     });
 }
 /* ###################*/

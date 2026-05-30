@@ -18,6 +18,39 @@ def admin_server():
 
     c = conn.cursor()
 
+    # c.execute("""
+    #     SELECT *
+    #     FROM parques
+    #     ORDER BY nome
+    # """)
+
+    # parques = c.fetchall()
+
+    c.execute("""
+        SELECT *
+        FROM utilizadores
+        WHERE tipo='park_admin'
+        ORDER BY username
+    """)
+
+    admins = c.fetchall()
+
+    c.execute("""
+        SELECT
+            ap.admin_id,
+            ap.parque_id,
+            u.username,
+            p.nome AS parque_nome
+        FROM admin_parques ap
+        JOIN utilizadores u
+            ON ap.admin_id = u.id
+        JOIN parques p
+            ON ap.parque_id = p.id
+        ORDER BY u.username
+    """)
+
+    associacoes = c.fetchall()
+
     # =========================
     # PARQUES + ADMIN ASSOCIADO
     # =========================
@@ -44,30 +77,31 @@ def admin_server():
     # ADMINS + PARQUE ASSOCIADO
     # =========================
 
-    c.execute("""
-        SELECT
-            u.id,
-            u.nome,
-            u.username,
-            p.id AS parque_id,
-            p.nome AS parque_nome
-        FROM utilizadores u
-        LEFT JOIN admin_parques ap
-            ON u.id = ap.admin_id
-        LEFT JOIN parques p
-            ON ap.parque_id = p.id
-        WHERE u.tipo = 'park_admin'
-        ORDER BY u.id
-    """)
+    # c.execute("""
+    #     SELECT
+    #         u.id,
+    #         u.nome,
+    #         u.username,
+    #         p.id AS parque_id,
+    #         p.nome AS parque_nome
+    #     FROM utilizadores u
+    #     LEFT JOIN admin_parques ap
+    #         ON u.id = ap.admin_id
+    #     LEFT JOIN parques p
+    #         ON ap.parque_id = p.id
+    #     WHERE u.tipo = 'park_admin'
+    #     ORDER BY u.id
+    # """)
 
-    admins = c.fetchall()
+    # admins = c.fetchall()
 
     conn.close()
 
     return render_template(
         "admin_server.html",
         parques=parques,
-        admins=admins
+        admins=admins,
+        associacoes=associacoes
     )
 
 
