@@ -25,7 +25,8 @@ def init():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL,
         localizacao TEXT,
-        capacidade INTEGER NOT NULL
+        capacidade INTEGER NOT NULL,
+        ativo INTEGER DEFAULT 1
     )
     ''')
 
