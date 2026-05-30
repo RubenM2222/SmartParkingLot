@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, jsonify
 from .database import db
 import sqlite3
+from datetime import datetime, timedelta
 
 client_bp = Blueprint("client", __name__)
 
@@ -142,14 +143,191 @@ def painel():
         livres=livres,
         ocupados=ocupados,
         reservados=reservados,
-        parques=parques
+        parques=parques,
     )
 
 # PARA fazer reservas
-@client_bp.route("/reservar")
+@client_bp.route("/reservar", methods=["POST"])
 def reservar():
-    return 0
 
-@client_bp.route("/estado")
-def estado():
-    return 0
+    dados = request.get_json()
+    print("DADOS:", dados)
+
+    matricula = dados.get("matricula", "").strip().upper()
+    parque_id = dados.get("parque_id")
+
+    if not matricula:
+        return jsonify({
+            "ok": False,
+            "msg": "Matrícula inválida"
+        })
+
+    conn = db()
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    # remover reservas expiradas
+    c.execute("""
+        UPDATE reservas
+        SET ativo = 0
+        WHERE ativo = 1
+        AND expira < datetime('now')
+    """)
+
+    # verificar parque
+    c.execute("""
+        SELECT capacidade, ativo
+        FROM parques
+        WHERE id = ?
+    """, (parque_id,))
+
+    parque = c.fetchone()
+
+    if not parque:
+        conn.close()
+        return jsonify({
+            "ok": False,
+            "msg": "Parque não encontrado"
+        })
+
+    if parque["ativo"] == 0:
+        conn.close()
+        return jsonify({
+            "ok": False,
+            "msg": "Parque encerrado"
+        })
+
+    capacidade = parque["capacidade"]
+
+    # carros dentro do parque
+    c.execute("""
+        SELECT COUNT(*)
+        FROM carros
+        WHERE parque_id = ?
+        AND ativo = 1
+    """, (parque_id,))
+
+    ocupados = c.fetchone()[0]
+
+    # reservas válidas
+    c.execute("""
+        SELECT COUNT(*)
+        FROM reservas
+        WHERE parque_id = ?
+        AND ativo = 1
+        AND expira > datetime('now')
+    """, (parque_id,))
+
+    reservados = c.fetchone()[0]
+
+    livres = capacidade - ocupados - reservados
+
+    if livres <= 0:
+        conn.close()
+        return jsonify({
+            "ok": False,
+            "msg": "Sem lugares disponíveis"
+        })
+
+    # verificar se já existe reserva ativa para a matrícula
+    c.execute("""
+        SELECT id
+        FROM reservas
+        WHERE matricula = ?
+        AND ativo = 1
+        AND expira > datetime('now')
+    """, (matricula,))
+
+    if c.fetchone():
+        conn.close()
+        return jsonify({
+            "ok": False,
+            "msg": "Já existe uma reserva ativa"
+        })
+
+    agora = datetime.now()
+    expira = agora + timedelta(minutes=15)
+
+    c.execute("""
+        INSERT INTO reservas
+        (
+            parque_id,
+            matricula,
+            inicio,
+            expira,
+            ativo
+        )
+        VALUES (?, ?, ?, ?, 1)
+    """, (
+        parque_id,
+        matricula,
+        agora.isoformat(" "),
+        expira.isoformat(" ")
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "ok": True,
+        "msg": f"Reserva criada até {expira.strftime('%H:%M')}"
+    })
+
+@client_bp.route("/estado/<int:parque_id>")
+def estado(parque_id):
+
+    conn = db()
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    # limpar reservas expiradas
+    c.execute("""
+        UPDATE reservas
+        SET ativo = 0
+        WHERE ativo = 1
+        AND expira < datetime('now')
+    """)
+
+    c.execute("""
+        SELECT capacidade
+        FROM parques
+        WHERE id = ?
+    """, (parque_id,))
+
+    parque = c.fetchone()
+
+    if not parque:
+        conn.close()
+        return jsonify({"erro": "Parque não encontrado"}), 404
+
+    capacidade = parque["capacidade"]
+
+    c.execute("""
+        SELECT COUNT(*)
+        FROM carros
+        WHERE parque_id = ?
+        AND ativo = 1
+    """, (parque_id,))
+
+    ocupados = c.fetchone()[0]
+
+    c.execute("""
+        SELECT COUNT(*)
+        FROM reservas
+        WHERE parque_id = ?
+        AND ativo = 1
+        AND expira > datetime('now')
+    """, (parque_id,))
+
+    reservados = c.fetchone()[0]
+
+    livres = max(0, capacidade - ocupados - reservados)
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "livres": livres,
+        "ocupados": ocupados,
+        "reservados": reservados
+    })
