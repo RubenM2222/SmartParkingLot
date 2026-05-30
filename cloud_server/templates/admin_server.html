@@ -175,6 +175,7 @@ button{
                     <tr>
                         <th>ID</th>
                         <th>Nome</th>
+                        <th>Localização</th>
                         <th>Capacidade</th>
                         <th>Admin Associado</th>
                         <th>Ações</th>
@@ -188,6 +189,7 @@ button{
 
                         <td>{{ p.id }}</td>
                         <td>{{ p.nome }}</td>
+                        <td>{{ p.localizacao }}</td>
                         <td>{{ p.capacidade }}</td>
 
                         <td>
@@ -290,6 +292,9 @@ button{
 
                 <input id="nome"
                        placeholder="Nome">
+                
+                <input id="localizacao"
+                       placeholder="Localização">
 
                 <input id="capacidade"
                        type="number"
@@ -390,6 +395,7 @@ function openTab(tab){
 function criarParque() {
 
     const nome = document.getElementById("nome").value;
+    const localizacao = document.getElementById("localizacao").value;
     const capacidade = document.getElementById("capacidade").value;
 
     fetch("/admin/parques/criar", {
@@ -397,6 +403,7 @@ function criarParque() {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
             nome: nome,
+            localizacao: localizacao,
             capacidade: capacidade
         })
     })

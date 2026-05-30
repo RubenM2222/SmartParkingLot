@@ -26,6 +26,7 @@ def admin_server():
         SELECT
             p.id,
             p.nome,
+            p.localizacao,
             p.capacidade,
             u.id AS admin_id,
             u.username AS admin_username
