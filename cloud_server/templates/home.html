@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Smart Parking</title>
 
     <style>
-
         *{
             margin:0;
             padding:0;
@@ -17,7 +15,40 @@
 
         body{
             background:#f1f5f9;
-            padding:40px;
+            /* Removido o padding daqui para o header encostar nas bordas */
+        }
+
+        /* Novo container para o conteúdo principal manter o espaçamento */
+        main {
+            padding: 40px;
+        }
+
+        .header{
+            background:#1f2937;
+            color:white;
+            padding:15px 40px; /* Alinhado com o padding do main */
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h2 {
+            font-size: 1.5rem;
+        }
+
+        .btn-login{
+            background:#ef4444;
+            color:white;
+            text-decoration: none; /* Remove o sublinhado do link */
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #dc2626; /* Efeito hover no login */
         }
 
         h1{
@@ -28,31 +59,21 @@
 
         .grid{
             display:grid;
-
-            grid-template-columns:
-                repeat(auto-fit, minmax(280px, 1fr));
-
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap:25px;
         }
 
         .card{
-
             background:white;
-
             border-radius:16px;
-
             padding:25px;
-
             box-shadow:0 4px 12px rgba(0,0,0,0.08);
-
             transition:0.2s;
-
             cursor:pointer;
         }
 
         .card:hover{
             transform:translateY(-4px);
-
             box-shadow:0 8px 20px rgba(0,0,0,0.15);
         }
 
@@ -68,63 +89,54 @@
 
         .btn{
             margin-top:20px;
-
             width:100%;
-
             padding:12px;
-
             border:none;
-
             border-radius:10px;
-
             background:#2563eb;
-
             color:white;
-
             font-weight:bold;
-
             cursor:pointer;
         }
 
         .btn:hover{
             background:#1d4ed8;
         }
-
     </style>
 </head>
 
 <body>
 
-<h1>Smart Parking System</h1>
+<header class="header">
+    <h2>Smart Parking System</h2>
+    <a class="btn-login" href="/admin/park">
+        Login
+    </a>
+</header>
 
-<div class="grid">
+<main>
+    <h1>Smart Parking System</h1>
 
-    {% for parque in parques %}
+    <div class="grid">
+        {% for parque in parques %}
+        <div class="card" onclick="window.location.href='/parque/{{ parque.id }}'">
+            <h2>{{ parque.nome }}</h2>
 
-    <div
-        class="card"
-        onclick="window.location.href='/parque/{{ parque.id }}'"
-    >
+            <div class="info">
+                📍 {{ parque.localizacao }}
+            </div>
 
-        <h2>{{ parque.nome }}</h2>
+            <div class="info">
+                🅿️ Capacidade: {{ parque.capacidade }}
+            </div>
 
-        <div class="info">
-            📍 {{ parque.localizacao }}
+            <button class="btn">
+                Ver Parque
+            </button>
         </div>
-
-        <div class="info">
-            🅿️ Capacidade: {{ parque.capacidade }}
-        </div>
-
-        <button class="btn">
-            Ver Parque
-        </button>
-
+        {% endfor %}
     </div>
-
-    {% endfor %}
-
-</div>
+</main>
 
 </body>
 </html>
