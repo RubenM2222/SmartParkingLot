@@ -25,7 +25,7 @@ O Flask já serve o HTML, por isso não é necessário usar:
 
 python -m http.server 8000 
 
-Usar /admin?key=admin123 para aceder ao dashboard admin
+Usar /admin?key=admin123 para aceder ao dashboard admin(ja nao é necessario)
 
 ---
 

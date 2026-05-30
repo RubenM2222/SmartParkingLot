@@ -18,19 +18,45 @@ def admin_server():
 
     c = conn.cursor()
 
-    # parques
+    # =========================
+    # PARQUES + ADMIN ASSOCIADO
+    # =========================
+
     c.execute("""
-        SELECT *
-        FROM parques
+        SELECT
+            p.id,
+            p.nome,
+            p.capacidade,
+            u.id AS admin_id,
+            u.username AS admin_username
+        FROM parques p
+        LEFT JOIN admin_parques ap
+            ON p.id = ap.parque_id
+        LEFT JOIN utilizadores u
+            ON ap.admin_id = u.id
+        ORDER BY p.id
     """)
 
     parques = c.fetchall()
 
-    # admins
+    # =========================
+    # ADMINS + PARQUE ASSOCIADO
+    # =========================
+
     c.execute("""
-        SELECT *
-        FROM utilizadores
-        WHERE tipo = 'park_admin'
+        SELECT
+            u.id,
+            u.nome,
+            u.username,
+            p.id AS parque_id,
+            p.nome AS parque_nome
+        FROM utilizadores u
+        LEFT JOIN admin_parques ap
+            ON u.id = ap.admin_id
+        LEFT JOIN parques p
+            ON ap.parque_id = p.id
+        WHERE u.tipo = 'park_admin'
+        ORDER BY u.id
     """)
 
     admins = c.fetchall()
@@ -157,8 +183,32 @@ def criar_admin():
         "ok": True,
         "msg": "Administrador criado"
     })
+# =========================
+# REMOVER PARK ADMIN
+# =========================
+@admin_server_bp.route("/admin/utilizadores/remover/<int:admin_id>", methods=["POST"])
+def remover_admin(admin_id):
 
+    conn = db()
+    c = conn.cursor()
 
+    c.execute("""
+        DELETE FROM admin_parques
+        WHERE admin_id = ?
+    """, (admin_id,))
+
+    c.execute("""
+        DELETE FROM utilizadores
+        WHERE id = ?
+        AND tipo = 'park_admin'
+    """, (admin_id,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "ok": True
+    })
 # =========================
 # ASSOCIAR ADMIN A PARQUE
 # =========================

@@ -1,63 +1,388 @@
-<h1>Server Admin Dashboard</h1>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
 
-<hr>
+<title>Server Admin Dashboard</title>
 
-<h2>Parques</h2>
+<style>
 
-<ul>
-{% for p in parques %}
-    <li>
-        <b>{{ p.nome }}</b>
-        | ID: {{ p.id }}
-        | Capacidade: {{ p.capacidade }}
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+}
 
-        <button class="btn-remove" data-id="{{ p.id }}">
-            Remover
+.header{
+    background:#1f2937;
+    color:white;
+    padding:15px 25px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.container{
+    padding:20px;
+}
+
+.tabs{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.tab-btn{
+    border:none;
+    padding:12px 20px;
+    border-radius:6px;
+    cursor:pointer;
+    background:#d1d5db;
+}
+
+.tab-btn.active{
+    background:#2563eb;
+    color:white;
+}
+
+.tab-content{
+    display:none;
+}
+
+.tab-content.active{
+    display:block;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#e5e7eb;
+}
+
+th,td{
+    padding:10px;
+    border:1px solid #d1d5db;
+    text-align:left;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:15px;
+}
+
+.form-box{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+input,
+select{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    margin-bottom:15px;
+    box-sizing:border-box;
+}
+
+button{
+    padding:10px 15px;
+    cursor:pointer;
+}
+
+.btn-danger{
+    background:#dc2626;
+    color:white;
+    border:none;
+}
+
+.btn-warning{
+    background:#f59e0b;
+    color:white;
+    border:none;
+}
+
+.btn-primary{
+    background:#2563eb;
+    color:white;
+    border:none;
+}
+
+.btn-logout{
+    background:#ef4444;
+    color:white;
+    border:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+    <h2>Server Admin Dashboard</h2>
+
+    <button class="btn-logout" onclick="logout()">
+        Logout
+    </button>
+
+</div>
+
+<div class="container">
+
+    <div class="tabs">
+
+        <button id="btn-gestao"
+                class="tab-btn active"
+                onclick="openTab('gestao')">
+            Gestão
         </button>
-    </li>
-{% endfor %}
-</ul>
 
-<hr>
-
-<h2>Park Admins</h2>
-
-<ul>
-{% for a in admins %}
-    <li>
-        <b>{{ a.username }}</b>
-        | ID: {{ a.id }}
-
-        <input id="park_{{ a.id }}" placeholder="Parque ID">
-        
-        <button class="btn-unassign" data-id="{{ a.id }}">
-            Desassociar de parque
+        <button id="btn-operacoes"
+                class="tab-btn"
+                onclick="openTab('operacoes')">
+            Operações
         </button>
-    </li>
-{% endfor %}
-</ul>
 
-<hr>
+    </div>
 
-<h2>Criar Parque</h2>
+    <!-- GESTÃO -->
 
-<input id="nome" placeholder="Nome">
-<input id="capacidade" type="number" placeholder="Capacidade">
-<button onclick="criarParque()">Criar Parque</button>
+    <div id="gestao" class="tab-content active">
 
-<hr>
+        <div class="card">
 
-<h2>Associar Admin a Parque</h2>
+            <h3>Parques</h3>
 
-<input id="admin_id" placeholder="Admin ID">
-<input id="parque_id" placeholder="Parque ID">
-<button onclick="associarAdmin()">Associar</button>
+            <table>
 
-<hr>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Capacidade</th>
+                        <th>Admin Associado</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
 
-<button onclick="logout()">Logout</button>
+                <tbody>
+
+                {% for p in parques %}
+                    <tr>
+
+                        <td>{{ p.id }}</td>
+                        <td>{{ p.nome }}</td>
+                        <td>{{ p.capacidade }}</td>
+
+                        <td>
+                            {% if p.admin_username %}
+                                {{ p.admin_username }}
+                            {% else %}
+                                Sem admin
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <button
+                                class="btn-remove btn-danger"
+                                data-id="{{ p.id }}">
+                                Remover
+                            </button>
+                        </td>
+
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Park Admins</h3>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Parque</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for a in admins %}
+
+                    <tr>
+
+                        <td>{{ a.id }}</td>
+                        <td>{{ a.username }}</td>
+
+                        <td>
+                            {% if a.parque_nome %}
+                                {{ a.parque_nome }}
+                            {% else %}
+                                Sem parque
+                            {% endif %}
+                        </td>
+
+                        <td>
+
+                            {% if a.parque_id %}
+                            <button
+                                class="btn-unassign btn-warning"
+                                data-id="{{ a.id }}"
+                                data-parque="{{ a.parque_id }}">
+                                Desassociar
+                            </button>
+                            {% endif %}
+
+                            <button
+                                onclick="removerAdmin({{ a.id }})"
+                                class="btn-danger">
+                                Remover
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- OPERAÇÕES -->
+
+    <div id="operacoes" class="tab-content">
+
+        <div class="form-grid">
+
+            <div class="form-box">
+
+                <h3>Criar Parque</h3>
+
+                <input id="nome"
+                       placeholder="Nome">
+
+                <input id="capacidade"
+                       type="number"
+                       placeholder="Capacidade">
+
+                <button
+                    class="btn-primary"
+                    onclick="criarParque()">
+                    Criar Parque
+                </button>
+
+            </div>
+
+            <div class="form-box">
+
+                <h3>Criar Park Admin</h3>
+
+                <input id="admin_nome"
+                       placeholder="Nome">
+
+                <input id="admin_username"
+                       placeholder="Username">
+
+                <input id="admin_password"
+                       type="password"
+                       placeholder="Password">
+
+                <button
+                    class="btn-primary"
+                    onclick="criarAdmin()">
+                    Criar Admin
+                </button>
+
+            </div>
+
+            <div class="form-box">
+
+                <h3>Associar Admin a Parque</h3>
+
+                <select id="admin_id">
+
+                    {% for a in admins %}
+                        <option value="{{ a.id }}">
+                            {{ a.username }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+
+                <select id="parque_id">
+
+                    {% for p in parques %}
+                        <option value="{{ p.id }}">
+                            {{ p.nome }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+
+                <button
+                    class="btn-primary"
+                    onclick="associarAdmin()">
+                    Associar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 <script>
+
+function openTab(tab){
+
+    document
+        .querySelectorAll(".tab-content")
+        .forEach(t => t.classList.remove("active"));
+
+    document
+        .querySelectorAll(".tab-btn")
+        .forEach(t => t.classList.remove("active"));
+
+    document
+        .getElementById(tab)
+        .classList.add("active");
+
+    document
+        .getElementById("btn-" + tab)
+        .classList.add("active");
+}
 /* =========================
    PARQUES
 ========================= */
@@ -85,6 +410,65 @@ function criarParque() {
     });
 }
 
+/* =========================
+   criar admin de parque
+========================= */
+function criarAdmin() {
+
+    const nome = document.getElementById("admin_nome").value;
+    const username = document.getElementById("admin_username").value;
+    const password = document.getElementById("admin_password").value;
+
+    fetch("/admin/utilizadores/criar", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            nome: nome,
+            username: username,
+            password: password
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+
+        if (data.ok) {
+            alert("Administrador criado com sucesso");
+            location.reload();
+        }
+        else {
+            alert(data.msg);
+        }
+
+    });
+}
+
+function removerAdmin(adminId) {
+
+    if (!confirm("Tem a certeza que pretende remover este administrador?")) {
+        return;
+    }
+
+    fetch(`/admin/utilizadores/remover/${adminId}`, {
+        method: "POST"
+    })
+    .then(r => r.json())
+    .then(data => {
+
+        if (data.ok) {
+            alert("Administrador removido com sucesso");
+            location.reload();
+        } else {
+            alert(data.msg || "Erro ao remover administrador");
+        }
+
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro de comunicação com o servidor");
+    });
+}
 /* =========================
    ADMIN ↔ PARQUE
 ========================= */
