@@ -144,3 +144,12 @@ def painel():
         reservados=reservados,
         parques=parques
     )
+
+# PARA fazer reservas
+@client_bp.route("/reservar")
+def reservar():
+    return 0
+
+@client_bp.route("/estado")
+def estado():
+    return 0
