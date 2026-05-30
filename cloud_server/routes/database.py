@@ -26,6 +26,8 @@ def init():
         nome TEXT NOT NULL,
         localizacao TEXT,
         capacidade INTEGER NOT NULL,
+        preco_base REAL DEFAULT 1,
+        preco_min REAL DEFAULT 0.05,      
         ativo INTEGER DEFAULT 1
     )
     ''')
@@ -144,7 +146,29 @@ def init():
             "123",
             "server_admin"
     ))
+    c.execute("""
+        SELECT id
+        FROM utilizadores
+        WHERE username = ?
+    """, ("Ado1",))
 
+    user_ado = c.fetchone()
+
+    if not user_ado:
+        c.execute("""
+            INSERT INTO utilizadores (
+                nome,
+                username,
+                password,
+                tipo
+            )
+            VALUES (?, ?, ?, ?)
+        """, (
+            "Ado",
+            "Ado1",
+            "123",
+            "park_admin"
+    ))
     # =========================
     # PARQUES DEFAULT
     # =========================
