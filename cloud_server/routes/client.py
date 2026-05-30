@@ -171,7 +171,7 @@ def reservar():
         UPDATE reservas
         SET ativo = 0
         WHERE ativo = 1
-        AND expira < datetime('now')
+        AND datetime(expira) < datetime('now', 'localtime')
     """)
 
     # verificar parque
@@ -215,7 +215,7 @@ def reservar():
         FROM reservas
         WHERE parque_id = ?
         AND ativo = 1
-        AND expira > datetime('now')
+        AND datetime(expira) < datetime('now', 'localtime')
     """, (parque_id,))
 
     reservados = c.fetchone()[0]
@@ -235,7 +235,7 @@ def reservar():
         FROM reservas
         WHERE matricula = ?
         AND ativo = 1
-        AND expira > datetime('now')
+        AND datetime(expira) < datetime('now', 'localtime')
     """, (matricula,))
 
     if c.fetchone():
@@ -285,7 +285,7 @@ def estado(parque_id):
         UPDATE reservas
         SET ativo = 0
         WHERE ativo = 1
-        AND expira < datetime('now')
+        AND datetime(expira) < datetime('now', 'localtime')
     """)
 
     c.execute("""
@@ -316,7 +316,7 @@ def estado(parque_id):
         FROM reservas
         WHERE parque_id = ?
         AND ativo = 1
-        AND expira > datetime('now')
+        AND datetime(expira) < datetime('now', 'localtime')
     """, (parque_id,))
 
     reservados = c.fetchone()[0]
