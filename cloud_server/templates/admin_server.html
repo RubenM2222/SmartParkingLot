@@ -497,6 +497,7 @@ function associarAdmin() {
     .then(data => {
         if (data.ok) {
             alert("Admin associado com sucesso");
+            location.reload();
         } else {
             alert("Erro ao associar");
         }
