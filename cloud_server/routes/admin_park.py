@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session
+from flask import Blueprint, render_template, session, request, redirect
 import sqlite3
 from .database import db
 from .auth import login_required
@@ -189,3 +189,58 @@ def park_detail(parque_id):
         taxa_ocupacao=taxa_ocupacao,
         receita_total=receita_total
     )
+
+@admin_park_bp.route("/admin/park/<int:parque_id>/update",methods=["POST"])
+@login_required
+def update_park(parque_id):
+
+    user_id = session["user_id"]
+
+    conn = db()
+    c = conn.cursor()
+
+    # validar acesso
+    c.execute("""
+        SELECT 1
+        FROM admin_parques
+        WHERE admin_id = ?
+        AND parque_id = ?
+    """, (user_id, parque_id))
+
+    if not c.fetchone():
+        conn.close()
+        return "Acesso negado", 403
+
+    nome = request.form["nome"]
+    localizacao = request.form["localizacao"]
+    capacidade = int(request.form["capacidade"])
+
+    preco_base = float(request.form["preco_base"])
+    preco_min = float(request.form["preco_min"])
+
+    ativo = int(request.form["ativo"])
+
+    c.execute("""
+        UPDATE parques
+        SET
+            nome = ?,
+            localizacao = ?,
+            capacidade = ?,
+            preco_base = ?,
+            preco_min = ?,
+            ativo = ?
+        WHERE id = ?
+    """, (
+        nome,
+        localizacao,
+        capacidade,
+        preco_base,
+        preco_min,
+        ativo,
+        parque_id
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return redirect(f"/admin/park/{parque_id}")
