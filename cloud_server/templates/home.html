@@ -102,6 +102,19 @@
         .btn:hover{
             background:#1d4ed8;
         }
+        .btn-register{
+            background:#2563eb;
+            color:white;
+            text-decoration:none;
+            padding:8px 16px;
+            border-radius:6px;
+            font-weight:bold;
+            transition:background 0.2s;
+        }
+
+        .btn-register:hover{
+            background:#1d4ed8;
+        }
     </style>
 </head>
 
@@ -109,9 +122,16 @@
 
 <header class="header">
     <h2>Smart Parking System</h2>
-    <a class="btn-login" href="/admin/park">
-        Login
-    </a>
+
+    <div style="display:flex; gap:10px;">
+        <a class="btn-login" href="/admin/park">
+            Login
+        </a>
+
+        <a class="btn-register" href="/register">
+            Token
+        </a>
+    </div>
 </header>
 
 <main>
