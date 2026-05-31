@@ -34,12 +34,12 @@ input, button{
 
 <div class="card">
 <h2>Livres</h2>
-<h1>{{ livres }}</h1>
+<h1 id="livres">{{ livres }}</h1>
 </div>
 
 <div class="card">
 <h2>Ocupados</h2>
-<h1>{{ ocupados }}</h1>
+<h1 id="ocupados">{{ ocupados }}</h1>
 </div>
 
 <hr>
@@ -82,6 +82,7 @@ function atualizar(){
     .then(res => res.json())
     .then(data => {
         document.getElementById("livres").innerText = data.livres;
+        document.getElementById("ocupados").innerText = data.ocupados;
     });
 }
 
