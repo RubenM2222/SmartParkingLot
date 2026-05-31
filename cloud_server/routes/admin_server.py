@@ -2,6 +2,8 @@ import sqlite3
 from flask import Blueprint, request, jsonify, render_template
 from .database import db
 from .auth import login_required
+import secrets
+import string
 
 admin_server_bp = Blueprint("admin_server", __name__)
 
@@ -95,13 +97,22 @@ def admin_server():
 
     # admins = c.fetchall()
 
+    c.execute("""
+        SELECT *
+        FROM tokens
+        ORDER BY id DESC
+    """)
+
+    tokens = c.fetchall()
+
     conn.close()
 
     return render_template(
         "admin_server.html",
         parques=parques,
         admins=admins,
-        associacoes=associacoes
+        associacoes=associacoes,
+        tokens=tokens
     )
 
 
@@ -328,4 +339,193 @@ def desassociar_admin():
     return jsonify({
         "ok": True,
         "msg": "Administrador removido do parque"
+    })
+
+# =========================
+# GERAR TOKENS
+# =========================
+def gerar_token(tamanho=12):
+
+    chars = string.ascii_uppercase + string.digits
+
+    return ''.join(
+        secrets.choice(chars)
+        for _ in range(tamanho)
+    )
+
+# =========================
+# GERAR TOKENS
+# =========================
+@admin_server_bp.route("/admin/tokens/criar", methods=["POST"])
+@login_required
+def criar_token():
+
+    data = request.json
+
+    max_parques = int(data.get("max_parques", 1))
+
+    token = gerar_token()
+
+    conn = db()
+    c = conn.cursor()
+
+    c.execute("""
+        INSERT INTO tokens
+        (
+            token,
+            criado_em,
+            max_parques
+        )
+        VALUES (?, datetime('now'), ?)
+    """, (
+        token,
+        max_parques
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "ok": True,
+        "token": token
+    })
+
+# =========================
+# CONSUMIR TOKENS
+# =========================
+
+@admin_server_bp.route("/register")
+def register_page():
+
+    return render_template("register.html")
+
+@admin_server_bp.route("/register", methods=["POST"])
+def register():
+
+    data = request.json
+
+    token = data["token"]
+
+    conn = db()
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT *
+        FROM tokens
+        WHERE token = ?
+        AND usado = 0
+    """, (token,))
+
+    token_row = c.fetchone()
+
+    if not token_row:
+
+        return jsonify({
+            "ok": False,
+            "msg": "Token inválido"
+        })
+
+    parques = data["parques"]
+
+    if len(parques) > token_row["max_parques"]:
+
+        return jsonify({
+            "ok": False,
+            "msg": "Número máximo de parques excedido"
+        })
+
+    c.execute("""
+        INSERT INTO utilizadores
+        (
+            nome,
+            username,
+            password,
+            tipo
+        )
+        VALUES (?, ?, ?, ?)
+    """, (
+        data["nome"],
+        data["username"],
+        data["password"],
+        "park_admin"
+    ))
+
+    admin_id = c.lastrowid
+
+    for parque in parques:
+
+        c.execute("""
+            INSERT INTO parques
+            (
+                nome,
+                localizacao,
+                capacidade
+            )
+            VALUES (?, ?, ?)
+        """, (
+            parque["nome"],
+            parque["localizacao"],
+            parque["capacidade"]
+        ))
+
+        parque_id = c.lastrowid
+
+        c.execute("""
+            INSERT INTO admin_parques
+            (
+                admin_id,
+                parque_id
+            )
+            VALUES (?, ?)
+        """, (
+            admin_id,
+            parque_id
+        ))
+
+    c.execute("""
+        UPDATE tokens
+        SET usado = 1,
+            usado_em = datetime('now')
+        WHERE id = ?
+    """, (token_row["id"],))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "ok": True
+    })
+
+# QUANTIDADE DE PARQUES PERMITIDO
+@admin_server_bp.route("/token-info/<token>")
+def token_info(token):
+
+    conn = db()
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT
+            max_parques,
+            usado
+        FROM tokens
+        WHERE token = ?
+    """, (token,))
+
+    row = c.fetchone()
+
+    conn.close()
+
+    if not row:
+        return jsonify({
+            "ok": False
+        })
+
+    if row["usado"]:
+        return jsonify({
+            "ok": False
+        })
+
+    return jsonify({
+        "ok": True,
+        "max_parques": row["max_parques"]
     })

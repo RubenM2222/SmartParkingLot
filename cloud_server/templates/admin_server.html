@@ -159,6 +159,11 @@ button{
             Operações
         </button>
 
+        <button id="btn-tokens"
+                class="tab-btn"
+                onclick="openTab('tokens')">
+            Tokens
+        </button>
     </div>
 
     <!-- GESTÃO -->
@@ -390,6 +395,81 @@ button{
 
     </div>
 
+    <!-- TOKENS -->
+
+    <div id="tokens" class="tab-content">
+
+        <div class="form-box">
+
+            <h3>Gerar Token</h3>
+            Maximo de parques
+            <input
+                id="max_parques"
+                type="number"
+                min="1"
+                value="1"
+                placeholder="Máximo de parques">
+
+            <button
+                class="btn-primary"
+                onclick="criarToken()">
+                Gerar Token
+            </button>
+
+        </div>
+
+        <br>
+
+        <div class="card">
+
+            <h3>Tokens</h3>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Token</th>
+                        <th>Max Parques</th>
+                        <th>Estado</th>
+                        <th>Criado Em</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                {% for t in tokens %}
+                    <tr>
+
+                        <td>{{ t.id }}</td>
+
+                        <td>
+                            <code>{{ t.token }}</code>
+                        </td>
+
+                        <td>{{ t.max_parques }}</td>
+
+                        <td>
+                            {% if t.usado %}
+                                Utilizado
+                            {% else %}
+                                Disponível
+                            {% endif %}
+                        </td>
+
+                        <td>{{ t.criado_em }}</td>
+
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
 </div>
 
 <script>
@@ -592,6 +672,46 @@ function desassociarAdmin(admin_id, parque_id) {
             alert(data.msg || "Erro ao desassociar");
         }
 
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro de comunicação");
+    });
+}
+
+/* =========================
+   TOKENS
+========================= */
+function criarToken() {
+
+    const max_parques =
+        document.getElementById("max_parques").value;
+
+    fetch("/admin/tokens/criar", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            max_parques: max_parques
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+
+        if (data.ok) {
+
+            alert(
+                "Token criado com sucesso:\n\n" +
+                data.token
+            );
+
+            location.reload();
+
+        } else {
+
+            alert("Erro ao criar token");
+        }
     })
     .catch(err => {
         console.error(err);

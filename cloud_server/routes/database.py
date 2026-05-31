@@ -117,6 +117,22 @@ def init():
         FOREIGN KEY(carro_id) REFERENCES carros(id)
     )
     ''')
+
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        token TEXT UNIQUE NOT NULL,
+
+        criado_em TEXT NOT NULL,
+
+        usado INTEGER DEFAULT 0,
+
+        max_parques INTEGER DEFAULT 1,
+
+        usado_em TEXT
+    )
+    ''')
     
     # =========================
     # ADMIN DEFAULT
