@@ -171,7 +171,7 @@ def reservar():
         UPDATE reservas
         SET ativo = 0
         WHERE ativo = 1
-        AND datetime(expira) > datetime('now', 'localtime')
+        AND datetime(expira) < datetime('now', 'localtime')
     """)
 
     # verificar parque
@@ -285,9 +285,9 @@ def estado(parque_id):
         UPDATE reservas
         SET ativo = 0
         WHERE ativo = 1
-        AND datetime(expira) > datetime('now', 'localtime')
+        AND datetime(expira) < datetime('now', 'localtime')
     """)
-
+    
     c.execute("""
         SELECT capacidade
         FROM parques
@@ -331,3 +331,7 @@ def estado(parque_id):
         "ocupados": ocupados,
         "reservados": reservados
     })
+    
+@client_bp.route("/terminal")
+def terminal():
+    return render_template("terminal.html")

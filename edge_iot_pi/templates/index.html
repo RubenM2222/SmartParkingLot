@@ -34,6 +34,7 @@
 const SERVER_HOST = window.location.hostname;
 const OCR_SERVER = `http://${SERVER_HOST}:5001`;
 const PARKING_SERVER = `http://${SERVER_HOST}:5000`;
+const parqueId = 1; // ID do parque (pode ser dinâmico se tiver vários parques)
 
 function enviar() {
     //Usar camera
@@ -45,7 +46,6 @@ function enviar() {
     //Usar camera ou ficheiros
     const inputCamera = document.getElementById('camera');
     const inputFile = document.getElementById('imagem');
-    const parqueId = document.getElementById("parque_id").value;
 
     const input = inputCamera.files.length ? inputCamera : inputFile;
     if (input.files.length === 0) {
@@ -93,7 +93,6 @@ function enviar() {
 function saida() {
     const inputCamera = document.getElementById('camera');
     const inputFile = document.getElementById('saidaImagem');
-    const parqueId = document.getElementById("parque_id").value;
 
     const input = inputCamera.files.length ? inputCamera : inputFile;
 
@@ -128,11 +127,14 @@ function saida() {
             throw new Error(resultado.msg || "Erro na saída do servidor.");
         }
 
-        alert(
-            resultado.msg +
-            "\nTempo: " + resultado.tempo_min + " min" +
-            "\nPreço: " + resultado.preco + " €"
-        );
+        sessionStorage.setItem("pagamento", JSON.stringify({
+            matricula: data.matricula,
+            tempo_min: resultado.tempo_min,
+            preco: resultado.preco,
+            parque_id: parqueId
+        }));
+
+        window.location.href = "/pagamento";
     })
     .catch(err => {
         console.error(err);

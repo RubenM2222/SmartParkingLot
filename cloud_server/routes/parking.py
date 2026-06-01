@@ -190,13 +190,10 @@ def saida(parque_id):
 
     # fechar registo
     c.execute("""
-        UPDATE carros
-        SET saida = ?, ativo = 0
-        WHERE id = ?
-    """, (
-        agora_str,
-        carro["id"]
-    ))
+    UPDATE carros
+    SET saida = ?, ativo = 0, preco = ?, tempo = ?
+    WHERE id = ?
+""", (agora_str, round(preco, 2), tempo_min, carro["id"]))
 
     conn.commit()
     conn.close()
@@ -205,7 +202,8 @@ def saida(parque_id):
         "ok": True,
         "msg": "Saída registada",
         "tempo_min": tempo_min,
-        "preco": round(preco, 2)
+        "preco": round(preco, 2),
+        "parque_id": parque_id
     })
 
 

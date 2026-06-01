@@ -159,3 +159,42 @@ def confirmar_pagamento(carro_id):
         "carro_id": carro_id,
         "data_pagamento": agora
     })
+    
+@payment_bp.route("/api/pagamento/<int:parque_id>")
+def api_pagamento(parque_id):
+
+    matricula = request.args.get("matricula")
+
+    conn = db()
+    conn.row_factory = sqlite3.Row
+
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT id
+        FROM carros
+        WHERE matricula = ?
+        AND parque_id = ?
+        AND ativo = 0
+        AND pago = 0
+        ORDER BY entrada DESC
+        LIMIT 1
+    """, (
+        matricula,
+        parque_id
+    ))
+
+    carro = c.fetchone()
+
+    conn.close()
+
+    if not carro:
+        return jsonify({
+            "ok": False,
+            "msg": "Pagamento não encontrado"
+        }), 404
+
+    return jsonify({
+        "ok": True,
+        "carro_id": carro["id"]
+    })

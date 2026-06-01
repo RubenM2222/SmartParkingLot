@@ -8,8 +8,8 @@ import requests, socket, re
 app = Flask(__name__)
 CORS(app)
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Users\2222068\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
-#pytesseract.pytesseract.tesseract_cmd = r'C:\Users\ruben\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Users\2222068\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\ruben\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 print(pytesseract.get_tesseract_version())
 
 @app.route("/")
@@ -107,5 +107,9 @@ def get_parque_id():
         return int(match.group(1))
 
     return None
+
+@app.route("/pagamento")
+def pagamento():
+    return render_template("pagamento.html")
 
 app.run(host='0.0.0.0', port=5001)

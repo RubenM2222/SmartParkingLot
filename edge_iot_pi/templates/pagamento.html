@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #f5f0e8;
+        --dark: #1a1a2e;
+        --card: #ffffff;
+        --accent: #e63946;
+        --green: #2d6a4f;
+        --green-light: #95d5b2;
+        --text: #1a1a2e;
+        --muted: #8a8a9a;
+        --border: #e0d8cc;
+        --mono: 'JetBrains Mono', monospace;
+        --sans: 'Syne', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        background: var(--bg);
+        font-family: var(--sans);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* background decoration */
+    body::before {
+        content: 'P';
+        position: fixed;
+        font-size: 600px;
+        font-weight: 800;
+        color: rgba(26,26,46,0.04);
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        font-family: var(--sans);
+        line-height: 1;
+    }
+
+    /* ── WRAPPER ── */
+    .wrapper {
+        width: 100%;
+        max-width: 440px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        opacity: 0;
+        animation: slideDown .5s ease .1s forwards;
+    }
+
+    .brand {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+
+    .clock {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--muted);
+    }
+
+    /* ── PLATE ── */
+    .plate-wrap {
+        text-align: center;
+        margin-bottom: 28px;
+        opacity: 0;
+        animation: slideDown .5s ease .2s forwards;
+    }
+
+    .plate-label {
+        font-size: 11px;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 12px;
+    }
+
+    .plate {
+        display: inline-block;
+        background: var(--dark);
+        color: #fff;
+        font-family: var(--mono);
+        font-size: 36px;
+        font-weight: 700;
+        letter-spacing: .2em;
+        padding: 16px 36px;
+        border-radius: 12px;
+        position: relative;
+        box-shadow: 0 8px 32px rgba(26,26,46,.2);
+    }
+
+    .plate::before,
+    .plate::after {
+        content: '';
+        position: absolute;
+        top: 50%; transform: translateY(-50%);
+        width: 10px; height: 10px;
+        background: var(--bg);
+        border-radius: 50%;
+    }
+
+    .plate::before { left: 12px; }
+    .plate::after  { right: 12px; }
+
+    /* ── CARD ── */
+    .card {
+        background: var(--card);
+        border-radius: 20px;
+        padding: 28px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 20px rgba(26,26,46,.07);
+        border: 1px solid var(--border);
+        opacity: 0;
+        animation: slideDown .5s ease .3s forwards;
+    }
+
+    .card-header {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 20px;
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 13px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .row:last-of-type { border-bottom: none; }
+
+    .row-key {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--muted);
+    }
+
+    .row-val {
+        font-family: var(--mono);
+        font-size: 14px;
+        color: var(--text);
+        font-weight: 700;
+    }
+
+    /* ── TOTAL ── */
+    .total-card {
+        background: var(--dark);
+        border-radius: 20px;
+        padding: 28px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        opacity: 0;
+        animation: slideDown .5s ease .4s forwards;
+    }
+
+    .total-label {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,.5);
+    }
+
+    .total-amount {
+        font-family: var(--mono);
+        font-size: 48px;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1;
+    }
+
+    .total-currency {
+        font-size: 22px;
+        color: rgba(255,255,255,.5);
+        margin-left: 4px;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-pagar {
+        width: 100%;
+        padding: 20px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 16px;
+        font-family: var(--sans);
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: .06em;
+        cursor: pointer;
+        transition: transform .15s, box-shadow .15s;
+        box-shadow: 0 4px 20px rgba(230,57,70,.35);
+        opacity: 0;
+        animation: slideDown .5s ease .5s forwards;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .btn-pagar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(230,57,70,.45);
+    }
+
+    .btn-pagar:active { transform: scale(.98); }
+
+    .btn-voltar {
+        width: 100%;
+        padding: 14px;
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-family: var(--sans);
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background .2s, color .2s;
+        opacity: 0;
+        animation: slideDown .5s ease .6s forwards;
+    }
+
+    .btn-voltar:hover {
+        background: var(--border);
+        color: var(--text);
+    }
+
+    /* ── SUCESSO ── */
+    .sucesso {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 20px 0;
+    }
+
+    .sucesso.show { display: flex; }
+
+    .check-circle {
+        width: 90px; height: 90px;
+        background: var(--green-light);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 44px;
+        margin-bottom: 24px;
+        animation: pop .4s cubic-bezier(.175,.885,.32,1.275);
+    }
+
+    @keyframes pop {
+        from { transform: scale(0); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+    }
+
+    .sucesso h2 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--green);
+        margin-bottom: 8px;
+    }
+
+    .sucesso p {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+
+    .sucesso .data-pag {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--muted);
+        background: var(--border);
+        padding: 8px 16px;
+        border-radius: 8px;
+        margin-bottom: 28px;
+    }
+
+    /* ── ERRO ── */
+    .erro-box {
+        display: none;
+        background: #fff0f0;
+        border: 1px solid #ffcccc;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 16px;
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .erro-box.show { display: block; }
+
+    /* ── SPINNER ── */
+    .spinner {
+        width: 20px; height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin .6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ANIMATIONS ── */
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-12px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── ERRO SEM DADOS ── */
+    .sem-dados {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .sem-dados h2 {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--text);
+        margin-bottom: 8px;
+    }
+
+    .sem-dados p {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+    <div class="topbar">
+        <div class="brand">Smart Parking</div>
+        <div class="clock" id="clock">--:--:--</div>
+    </div>
+
+    <!-- SEM DADOS -->
+    <div class="sem-dados" id="sem-dados" style="display:none">
+        <h2>⚠️ Sem dados de pagamento</h2>
+        <p>Acede a esta página após registar a saída de um veículo.</p>
+        <button class="btn-voltar" style="opacity:1" onclick="window.location.href='/'">
+            ← Voltar ao início
+        </button>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div id="conteudo">
+
+        <div class="plate-wrap">
+            <div class="plate-label">Veículo identificado</div>
+            <div class="plate" id="matricula-display">——</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Detalhes da Estadia</div>
+            <div class="row">
+                <span class="row-key">Duração</span>
+                <span class="row-val" id="tempo-display">— min</span>
+            </div>
+            <div class="row">
+                <span class="row-key">Parque</span>
+                <span class="row-val" id="parque-display">—</span>
+            </div>
+        </div>
+
+        <div class="total-card">
+            <div class="total-label">Total<br>a pagar</div>
+            <div>
+                <span class="total-amount" id="preco-display">—</span>
+                <span class="total-currency">€</span>
+            </div>
+        </div>
+
+        <div class="erro-box" id="erro-box"></div>
+
+        <!-- SUCESSO -->
+        <div class="sucesso" id="sucesso">
+            <div class="check-circle">✓</div>
+            <h2>Pago!</h2>
+            <p>Pagamento processado com sucesso.<br>Boa viagem!</p>
+            <div class="data-pag" id="data-pag"></div>
+            <button class="btn-voltar" style="opacity:1; width:100%" onclick="window.location.href='/'">
+                ← Novo registo
+            </button>
+        </div>
+
+        <button class="btn-pagar" id="btn-pagar" onclick="confirmarPagamento()">
+            <span id="btn-icon">💳</span>
+            <span id="btn-texto">Confirmar Pagamento</span>
+        </button>
+
+        <button class="btn-voltar" onclick="window.location.href='/'">
+            ← Cancelar
+        </button>
+
+    </div>
+</div>
+
+<script>
+// =========================
+// RELÓGIO
+// =========================
+function tick() {
+    document.getElementById("clock").textContent =
+        new Date().toLocaleTimeString("pt-PT");
+}
+setInterval(tick, 1000);
+tick();
+
+// =========================
+// CARREGAR DADOS
+// =========================
+const raw = sessionStorage.getItem("pagamento");
+
+if (!raw) {
+    document.getElementById("conteudo").style.display = "none";
+    document.getElementById("sem-dados").style.display = "block";
+} else {
+    const dados = JSON.parse(raw);
+
+    document.getElementById("matricula-display").textContent =
+        dados.matricula || "——";
+
+    const tempo = dados.tempo_min || 0;
+    const horas = Math.floor(tempo / 60);
+    const mins  = tempo % 60;
+    document.getElementById("tempo-display").textContent =
+        horas > 0 ? `${horas}h ${mins}m` : `${mins} min`;
+
+    document.getElementById("parque-display").textContent =
+        `#${dados.parque_id || "?"}`;
+
+    document.getElementById("preco-display").textContent =
+        parseFloat(dados.preco || 0).toFixed(2);
+}
+
+// =========================
+// CONFIRMAR PAGAMENTO
+// =========================
+const CLOUD = `http://${window.location.hostname}:5000`;
+
+async function confirmarPagamento() {
+    const dados = JSON.parse(sessionStorage.getItem("pagamento") || "{}");
+
+    if (!dados.matricula) return;
+
+    // estado loading
+    document.getElementById("btn-pagar").disabled = true;
+    document.getElementById("btn-icon").innerHTML = '<div class="spinner"></div>';
+    document.getElementById("btn-texto").textContent = "A processar...";
+    document.getElementById("erro-box").classList.remove("show");
+
+    try {
+        // buscar carro_id via api/pagamento
+        const r1 = await fetch(
+            `${CLOUD}/api/pagamento/${dados.parque_id}?matricula=${dados.matricula}`
+        );
+        const info = await r1.json();
+
+        if (!info.ok) {
+            mostrarErro(info.msg || "Pagamento não encontrado.");
+            resetBtn();
+            return;
+        }
+
+        // confirmar pagamento
+        const r2 = await fetch(
+            `${CLOUD}/payment/confirm/${info.carro_id}`,
+            { method: "POST" }
+        );
+        const resultado = await r2.json();
+
+        if (resultado.ok) {
+            sessionStorage.removeItem("pagamento");
+            document.getElementById("btn-pagar").style.display  = "none";
+            document.querySelector(".btn-voltar").style.display = "none";
+            document.getElementById("data-pag").textContent =
+                resultado.data_pagamento?.substring(0, 19).replace("T", " ") || "";
+            document.getElementById("sucesso").classList.add("show");
+        } else {
+            mostrarErro(resultado.msg || "Erro ao confirmar pagamento.");
+            resetBtn();
+        }
+
+    } catch (e) {
+        mostrarErro("Sem ligação ao servidor cloud.");
+        resetBtn();
+    }
+}
+
+function mostrarErro(msg) {
+    const box = document.getElementById("erro-box");
+    box.textContent = "⚠️ " + msg;
+    box.classList.add("show");
+}
+
+function resetBtn() {
+    const btn = document.getElementById("btn-pagar");
+    btn.disabled = false;
+    document.getElementById("btn-icon").textContent = "💳";
+    document.getElementById("btn-texto").textContent = "Confirmar Pagamento";
+}
+</script>
+</body>
+</html>
