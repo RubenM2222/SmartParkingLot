@@ -3,7 +3,8 @@ from flask_cors import CORS
 import pytesseract
 import cv2
 import numpy as np
-import requests, socket, re
+import requests, socket, re, os
+from urllib.parse import urlparse
 
 app = Flask(__name__)
 CORS(app)
