@@ -183,8 +183,18 @@ def saida(parque_id):
     tempo_min = int(
         (agora - entrada_dt).total_seconds() / 60
     )
-
-    preco = max(1.0, tempo_min * 0.05)
+        # buscar preços do parque
+    c.execute("""
+        SELECT preco_base, preco_min
+        FROM parques
+        WHERE id = ?
+    """, (parque_id,))
+ 
+    precos = c.fetchone()
+ 
+    preco_base = precos["preco_base"] if precos else 1.0
+    preco_min  = precos["preco_min"]  if precos else 0.05
+    preco = max(preco_base, tempo_min * preco_min)
 
     agora_str = agora.isoformat()
 

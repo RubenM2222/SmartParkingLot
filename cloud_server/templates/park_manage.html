@@ -254,12 +254,18 @@ th,td{
         <tr>
             <th>Matrícula</th>
             <th>Entrada</th>
+             <th>Ação</th>
         </tr>
 
         {% for carro in carros %}
         <tr>
             <td>{{ carro["matricula"] }}</td>
             <td>{{ carro["entrada"] }}</td>
+            <td>
+                <button onclick="forcarSaida('{{ carro['matricula'] }}', {{ parque.id }})">
+                Forçar Saída
+                </button>
+            </td>
         </tr>
         {% endfor %}
 
@@ -322,6 +328,21 @@ th,td{
         ← Voltar
     </a>
 </div>
+<script>
+function forcarSaida(matricula, parqueId) {
+    if (!confirm(`Forçar saída de ${matricula}?`)) return;
 
+    fetch(`/admin/park/${parqueId}/forcar_saida`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matricula })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.msg);
+        location.reload();
+    });
+}
+</script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, request, redirect
+from flask import Blueprint, jsonify, render_template, session, request, redirect
 import sqlite3
 from .database import db
 from .auth import login_required
@@ -244,3 +244,61 @@ def update_park(parque_id):
     conn.close()
 
     return redirect(f"/admin/park/{parque_id}")
+
+@admin_park_bp.route("/admin/park/<int:parque_id>/forcar_saida", methods=["POST"])
+@login_required
+def forcar_saida(parque_id):
+    user_id = session["user_id"]
+    dados = request.get_json()
+    matricula = dados.get("matricula", "").strip().upper()
+
+    conn = db()
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    # validar acesso
+    c.execute("""
+        SELECT 1 FROM admin_parques
+        WHERE admin_id = ? AND parque_id = ?
+    """, (user_id, parque_id))
+
+    if not c.fetchone():
+        conn.close()
+        return jsonify({"ok": False, "msg": "Acesso negado"}), 403
+
+    # buscar carro
+    c.execute("""
+        SELECT * FROM carros
+        WHERE matricula = ? AND parque_id = ? AND ativo = 1
+        ORDER BY entrada DESC LIMIT 1
+    """, (matricula, parque_id))
+
+    carro = c.fetchone()
+
+    if not carro:
+        conn.close()
+        return jsonify({"ok": False, "msg": "Veículo não encontrado"})
+
+    from datetime import datetime
+    agora = datetime.now()
+    entrada_dt = datetime.fromisoformat(carro["entrada"])
+    tempo_min = int((agora - entrada_dt).total_seconds() / 60)
+
+    # buscar preços do parque
+    c.execute("SELECT preco_base, preco_min FROM parques WHERE id = ?", (parque_id,))
+    precos = c.fetchone()
+    preco = max(precos["preco_base"], tempo_min * precos["preco_min"])
+
+    c.execute("""
+        UPDATE carros
+        SET saida = ?, ativo = 0, preco = ?, tempo = ?, pago = 1
+        WHERE id = ?
+    """, (agora.isoformat(), round(preco, 2), tempo_min, carro["id"]))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "ok": True,
+        "msg": f"Saída forçada — {tempo_min} min — {round(preco,2)}€"
+    })

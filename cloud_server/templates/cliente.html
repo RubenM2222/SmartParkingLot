@@ -49,6 +49,10 @@ input, button{
 <input type="text" id="matricula" placeholder="Matrícula">
 <button onclick="reservar()">Reservar</button>
 
+<h2>Cancelar Reserva</h2>
+<input type="text" id="matricula_cancelar" placeholder="Matrícula">
+<button onclick="cancelarReserva()">Cancelar Reserva</button>
+
 <script>
 function reservar() {
     const matricula = document.getElementById("matricula").value;
@@ -83,6 +87,22 @@ function atualizar(){
     .then(data => {
         document.getElementById("livres").innerText = data.livres;
         document.getElementById("ocupados").innerText = data.ocupados;
+    });
+}
+
+function cancelarReserva() {
+    const matricula = document.getElementById("matricula_cancelar").value;
+    const PARQUE_ID = {{ parque_id }};
+
+    fetch("/cancelar_reserva", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matricula, parque_id: PARQUE_ID })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.msg);
+        atualizar();
     });
 }
 

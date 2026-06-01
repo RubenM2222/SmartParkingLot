@@ -331,3 +331,33 @@ def estado(parque_id):
         "ocupados": ocupados,
         "reservados": reservados
     })
+    
+@client_bp.route("/cancelar_reserva", methods=["POST"])
+def cancelar_reserva():
+    dados = request.get_json()
+    matricula = dados.get("matricula", "").strip().upper()
+    parque_id = dados.get("parque_id")
+
+    if not matricula:
+        return jsonify({"ok": False, "msg": "Matrícula inválida"})
+
+    conn = db()
+    c = conn.cursor()
+
+    c.execute("""
+        UPDATE reservas
+        SET ativo = 0
+        WHERE matricula = ?
+        AND parque_id = ?
+        AND ativo = 1
+        AND datetime(expira) > datetime('now', 'localtime')
+    """)
+
+    alterados = c.rowcount
+    conn.commit()
+    conn.close()
+
+    if alterados == 0:
+        return jsonify({"ok": False, "msg": "Nenhuma reserva ativa encontrada"})
+
+    return jsonify({"ok": True, "msg": "Reserva cancelada"})
