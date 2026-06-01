@@ -80,7 +80,12 @@ def ocr():
     #    url,
     #    json={"matricula": texto}
     #)
-    url = f"http://127.0.0.1:5000/{tipo}/{parque_id}"
+    # DYNAMIC IP FETCHING HERE
+    base_url = get_cloud_base_url()
+    url = f"{base_url}/{tipo}/{parque_id}"
+    
+    #url = f"http://127.0.0.1:5000/{tipo}/{parque_id}"
+    
     try:
         resposta = requests.post(url, json={"matricula": texto}, timeout=3)
         try:
@@ -106,6 +111,36 @@ def get_parque_id():
     if match:
         return int(match.group(1))
 
+    return None
+
+# --- helper function to get target api url ---
+def get_cloud_base_url():
+    """Reads the target server IP/URL from a local txt file."""
+    filename = "ip.txt"
+    default_url = "http://127.0.0.1:5000"
+    
+    if not os.path.exists(filename):
+        print(f"Warning: {filename} not found. Using default: {default_url}")
+        return default_url
+        
+    try:
+        with open(filename, "r") as file:
+            ip = file.read().strip()
+            
+            # If the file only has an IP (like 192.168.1.50), format it into a URL
+            if ip and not ip.startswith("http"):
+                return f"http://{ip}:5000"
+            
+            return ip if ip else default_url
+    except Exception as e:
+        print(f"Error reading {filename}: {e}. Using default.")
+        return default_url
+
+def get_parque_id():
+    hostname = socket.gethostname()
+    match = re.search(r'parking(\d+)', hostname)
+    if match:
+        return int(match.group(1))
     return None
 
 @app.route("/pagamento")
