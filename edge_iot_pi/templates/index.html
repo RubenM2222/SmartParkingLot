@@ -34,7 +34,7 @@
 const SERVER_HOST = window.location.hostname;
 const OCR_SERVER = `http://${SERVER_HOST}:5001`;
 const PARKING_SERVER = `http://${SERVER_HOST}:5000`;
-const parqueId = 1; // ID do parque (pode ser dinâmico se tiver vários parques)
+// const parqueId = 1; // ID do parque (pode ser dinâmico se tiver vários parques)
 
 function enviar() {
     //Usar camera
@@ -46,6 +46,7 @@ function enviar() {
     //Usar camera ou ficheiros
     const inputCamera = document.getElementById('camera');
     const inputFile = document.getElementById('imagem');
+    const parqueId = document.getElementById("parque_id").value;
 
     const input = inputCamera.files.length ? inputCamera : inputFile;
     if (input.files.length === 0) {
@@ -93,6 +94,7 @@ function enviar() {
 function saida() {
     const inputCamera = document.getElementById('camera');
     const inputFile = document.getElementById('saidaImagem');
+    const parqueId = document.getElementById("parque_id").value;
 
     const input = inputCamera.files.length ? inputCamera : inputFile;
 
