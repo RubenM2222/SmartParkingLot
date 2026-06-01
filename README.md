@@ -61,6 +61,9 @@ python app.py
 ## 🍓 Raspberry Pi
 
 sudo apt install tesseract-ocr  
-pip3 install flask flask-cors pytesseract opencv-python pillow  
+
+(nao me lembro se preciso do pillow)pip3 install flask flask-cors pytesseract opencv-python pillow 
+
+pip install Flask flask-cors pytesseract opencv-python numpy requests
 
 python3 server.py  
