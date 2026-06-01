@@ -331,7 +331,3 @@ def estado(parque_id):
         "ocupados": ocupados,
         "reservados": reservados
     })
-    
-@client_bp.route("/terminal")
-def terminal():
-    return render_template("terminal.html")
