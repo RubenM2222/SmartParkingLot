@@ -126,12 +126,21 @@ def get_cloud_base_url():
     try:
         with open(filename, "r") as file:
             ip = file.read().strip()
+            if not ip:
+                return default_url
             
-            # If the file only has an IP (like 192.168.1.50), format it into a URL
-            if ip and not ip.startswith("http"):
-                return f"http://{ip}:5000"
+            # If they didn't type http:// or https://, add it temporarily so urlparse can read it
+            if not ip.startswith(("http://", "https://")):
+                parsed = urlparse(f"http://{ip}")
+            else:
+                parsed = urlparse(ip)
             
-            return ip if ip else default_url
+            # Extract the port. If no port was specified, parsed.port will be None
+            scheme = parsed.scheme if parsed.scheme else "http"
+            hostname = parsed.hostname if parsed.hostname else "127.0.0.1"
+            port = parsed.port if parsed.port else 5000
+            
+            return f"{scheme}://{hostname}:{port}"
     except Exception as e:
         print(f"Error reading {filename}: {e}. Using default.")
         return default_url
