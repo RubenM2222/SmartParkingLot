@@ -5,6 +5,8 @@
 
 <title>Server Admin Dashboard</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 
 body{
@@ -287,6 +289,12 @@ button{
                 class="tab-btn"
                 onclick="openTab('metricas')">
             Métricas
+        </button>
+
+        <button id="btn-logs"
+                class="tab-btn"
+                onclick="openTab('logs')">
+            📋 Logs
         </button>
     </div>
 
@@ -642,6 +650,44 @@ button{
 
         </div>
 
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px;">
+
+            <div class="card">
+                <h3>Receita Mensal</h3>
+                <canvas id="chart-receita"></canvas>
+            </div>
+
+            <div class="card">
+                <h3>Carros Estacionados por Mês</h3>
+                <canvas id="chart-carros"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- LOGS -->
+
+    <div id="logs" class="tab-content">
+
+        <div class="card">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+
+                <h3 style="margin:0;">Histórico de Ações</h3>
+
+                <div>
+                    <button class="btn-primary" style="background:#10b981;" onclick="exportarLogs()">⬇️ Exportar</button>
+                </div>
+
+            </div>
+
+            <div style="background:#f3f4f6;padding:15px;border-radius:8px;max-height:600px;overflow-y:auto;font-family:monospace;font-size:13px;line-height:1.6;" id="logs-container">
+                <p>Carregando logs...</p>
+            </div>
+
+        </div>
+
     </div>
 
 </div>
@@ -944,10 +990,154 @@ function carregarMetricas() {
                 occupancyContainer.appendChild(item);
             });
 
+            renderGraficoReceita(data.receita_mensal);
+            renderGraficoCarros(data.carros_mensal);
         })
         .catch(err => {
             console.error(err);
             document.getElementById("occupancy-container").innerHTML = "<p>Erro ao carregar métricas</p>";
         });
 }
+
+function renderGraficoReceita(dados) {
+
+    const meses = dados.map(d => d.mes);
+    const valores = dados.map(d => d.receita);
+
+    const ctx = document.getElementById("chart-receita").getContext("2d");
+
+    new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: meses,
+            datasets: [{
+                label: "Receita (€)",
+                data: valores,
+                backgroundColor: "#2563eb",
+                borderColor: "#1e40af",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: "Euros"
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderGraficoCarros(dados) {
+
+    const meses = dados.map(d => d.mes);
+    const valores = dados.map(d => d.carros);
+
+    const ctx = document.getElementById("chart-carros").getContext("2d");
+
+    new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: meses,
+            datasets: [{
+                label: "Carros Estacionados",
+                data: valores,
+                backgroundColor: "#10b981",
+                borderColor: "#047857",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: "Quantidade"
+                    }
+                }
+            }
+        }
+    });
+}
+
+/* =========================
+   LOGS
+========================= */
+function carregarLogs() {
+    fetch("/admin/logs/api")
+        .then(r => r.json())
+        .then(data => {
+            const container = document.getElementById("logs-container");
+            container.innerHTML = "";
+
+            if (data.logs.length === 0) {
+                container.innerHTML = '<div style="color:#6b7280;">Nenhum log disponível</div>';
+                return;
+            }
+
+            data.logs.forEach(log => {
+                const entry = document.createElement("div");
+                entry.style.paddingBottom = "8px";
+                entry.style.borderBottom = "1px solid #e5e7eb";
+                entry.style.color = "#374151";
+                entry.textContent = log.replace('\n', '');
+                container.appendChild(entry);
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById("logs-container").innerHTML = '<div style="color:red;">Erro ao carregar logs</div>';
+        });
+}
+
+function recarregarLogs() {
+    carregarLogs();
+}
+
+function exportarLogs() {
+    fetch("/admin/logs/api")
+        .then(r => r.json())
+        .then(data => {
+            const conteudo = data.logs.join("");
+            const blob = new Blob([conteudo], {type: "text/plain"});
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `logs_${new Date().toISOString().slice(0,10)}.txt`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Erro ao exportar logs");
+        });
+}
+
+// Carregar logs ao abrir a aba
+const originalOpenTab = window.openTab;
+window.openTab = function(tab) {
+    originalOpenTab(tab);
+    if (tab === "logs") {
+        carregarLogs();
+        setInterval(carregarLogs, 1000);
+    }
+};
+
 </script>
