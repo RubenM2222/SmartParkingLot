@@ -182,3 +182,4 @@ cython_debug/
 cloud_server/parking.db
 .vscode
 *.db
+parques.php

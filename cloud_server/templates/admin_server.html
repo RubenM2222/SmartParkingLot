@@ -158,7 +158,7 @@ button{
 }
 
 .occupancy-chart{
-    display:grid;
+    display: grid !important;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     gap:20px;
 }
@@ -725,6 +725,10 @@ function criarParque() {
     const nome = document.getElementById("nome").value;
     const localizacao = document.getElementById("localizacao").value;
     const capacidade = document.getElementById("capacidade").value;
+    if (!nome || !localizacao || !capacidade) {
+        alert("Preencha todos os campos");
+        return;
+    }
 
     fetch("/admin/parques/criar", {
         method: "POST",
@@ -753,6 +757,10 @@ function criarAdmin() {
     const nome = document.getElementById("admin_nome").value;
     const username = document.getElementById("admin_username").value;
     const password = document.getElementById("admin_password").value;
+    if (!nome || !username || !password) {
+        alert("Preencha todos os campos");
+        return;
+    }
 
     fetch("/admin/utilizadores/criar", {
         method: "POST",
@@ -1094,16 +1102,32 @@ function carregarLogs() {
 
             data.logs.forEach(log => {
                 const entry = document.createElement("div");
+
                 entry.style.paddingBottom = "8px";
                 entry.style.borderBottom = "1px solid #e5e7eb";
-                entry.style.color = "#374151";
+
+                // 🔥 DETECÇÃO DE COR
+                if (log.includes("CRIADO") || log.includes("CREATE")) {
+                    entry.style.color = "green";
+                } 
+                else if (log.includes("ELIMINADO") || log.includes("DELETE") || log.includes("REMOVIDO")) {
+                    entry.style.color = "red";
+                } 
+                else if (log.includes("GERADO") || log.includes("ASSOCIADO") || log.includes("EDIT")) {
+                    entry.style.color = "blue";
+                } 
+                else {
+                    entry.style.color = "#374151";
+                }
+
                 entry.textContent = log.replace('\n', '');
                 container.appendChild(entry);
             });
         })
         .catch(err => {
             console.error(err);
-            document.getElementById("logs-container").innerHTML = '<div style="color:red;">Erro ao carregar logs</div>';
+            document.getElementById("logs-container").innerHTML =
+                '<div style="color:red;">Erro ao carregar logs</div>';
         });
 }
 
