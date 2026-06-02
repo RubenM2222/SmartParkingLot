@@ -173,7 +173,7 @@ def park_detail(parque_id):
         WHERE c.parque_id = ?
     """, (parque_id,))
 
-    receita_total = c.fetchone()[0]
+    receita_total = round(c.fetchone()[0], 2)
     
     # gráfico entradas por hora
     c.execute("""

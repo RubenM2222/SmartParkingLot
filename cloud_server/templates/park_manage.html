@@ -184,7 +184,7 @@ th,td{
 
     <div class="card">
         <h3>Receita</h3>
-        <h1 id="valorReceita">{{ receita_total }}€</h1>
+        <h1 id="valorReceita">{{ "%.2f"|format(receita_total) }}€</h1>
     </div>
 
     <div class="card">
