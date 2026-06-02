@@ -39,12 +39,11 @@ def entrada(parque_id):
 
     # verificar pagamento pendente
     c.execute("""
-        SELECT id
-        FROM carros
-        WHERE matricula = ?
-        AND ativo = 0
-        AND pago = 0
-        ORDER BY entrada DESC
+        SELECT pp.id
+        FROM pagamentos_pendentes pp
+        JOIN carros c
+            ON c.id = pp.carro_id
+        WHERE c.matricula = ?
         LIMIT 1
     """, (matricula,))
 
@@ -187,7 +186,7 @@ def saida(parque_id):
             "ok": False,
             "msg": "Veículo não encontrado"
         }), 404
-
+    
     agora = datetime.now()
 
     entrada_dt = datetime.fromisoformat(carro["entrada"])
@@ -210,14 +209,44 @@ def saida(parque_id):
 
     agora_str = agora.isoformat()
 
-    # fechar registo
-    c.execute("""
-    UPDATE carros
-    SET saida = ?, ativo = 0, preco = ?, tempo = ?
-    WHERE id = ?
-""", (agora_str, round(preco, 2), tempo_min, carro["id"]))
+    try:
+        # fechar registo
+        c.execute("""
+        UPDATE carros
+        SET saida = ?, ativo = 0, preco = ?, tempo = ?
+        WHERE id = ?
+        """, (
+            agora_str,
+            round(preco, 2),
+            tempo_min,
+            carro["id"]
+        ))
 
-    conn.commit()
+        # criar pagamento pendente
+        c.execute("""
+        INSERT INTO pagamentos_pendentes (
+            carro_id,
+            criado_em
+        )
+        VALUES (?, ?)
+        """, (
+            carro["id"],
+            agora_str
+        ))
+
+        conn.commit()
+
+    except Exception as e:
+
+        conn.rollback()
+
+        conn.close()
+
+        return jsonify({
+            "ok": False,
+            "msg": f"Erro ao criar pagamento pendente: {str(e)}"
+        }), 500
+        
     conn.close()
 
     return jsonify({

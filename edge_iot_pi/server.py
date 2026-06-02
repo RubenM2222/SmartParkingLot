@@ -11,6 +11,8 @@ CORS(app)
 
 #pytesseract.pytesseract.tesseract_cmd = r'C:\Users\2222068\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 #pytesseract.pytesseract.tesseract_cmd = r'C:\Users\ruben\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\RubenM\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+
 print(pytesseract.get_tesseract_version())
 
 @app.route("/")
@@ -93,8 +95,12 @@ def ocr():
             cloud_data = resposta.json()
         except:
             cloud_data = {"erro": "resposta invalida da cloud"}
-    except:
+    except requests.exceptions.Timeout:
+        cloud_data = {"erro": "timeout cloud"}
+    except requests.exceptions.ConnectionError:
         cloud_data = {"erro": "cloud offline"}
+    except Exception as e:
+        cloud_data = {"erro": str(e)}
 
     #return jsonify({
     #    "matricula": texto,
@@ -161,6 +167,11 @@ def pagamento():
     
     base_url = get_cloud_base_url()
     url = f"{base_url}/{tipo}/{parque_id}"
-    return render_template("pagamento.html", url=url)
+    return render_template(
+        "pagamento.html",
+        cloud_url=base_url,
+        parque_id=parque_id
+    )
 
-app.run(host='0.0.0.0', port=5001)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001)

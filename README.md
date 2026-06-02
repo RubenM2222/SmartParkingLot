@@ -91,3 +91,9 @@ sudo apt install tesseract-ocr
 cd ~/edge_iot_pi
 source venv/bin/activate
 python app.py
+
+
+# Importante
+
+para aceder ao pagamento tem de ser 
+http://ip:5001/pagamento&parque_id=1

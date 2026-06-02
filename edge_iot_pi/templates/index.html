@@ -128,15 +128,7 @@ function saida() {
         if (!resultado.ok) {
             throw new Error(resultado.msg || "Erro na saída do servidor.");
         }
-
-        sessionStorage.setItem("pagamento", JSON.stringify({
-            matricula: data.matricula,
-            tempo_min: resultado.tempo_min,
-            preco: resultado.preco,
-            parque_id: parqueId
-        }));
-
-        //window.location.href = "/pagamento";
+        
     })
     .catch(err => {
         console.error(err);

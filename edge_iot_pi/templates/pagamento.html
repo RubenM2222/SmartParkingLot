@@ -439,63 +439,73 @@ function tick() {
 setInterval(tick, 1000);
 tick();
 
-// =========================
-// CARREGAR DADOS
-// =========================
-const raw = sessionStorage.getItem("pagamento");
+let carroAtual = null;
 
-if (!raw) {
-    document.getElementById("conteudo").style.display = "none";
-    document.getElementById("sem-dados").style.display = "block";
-} else {
-    const dados = JSON.parse(raw);
+async function carregarPagamento() {
 
-    document.getElementById("matricula-display").textContent =
-        dados.matricula || "——";
+    try {
 
-    const tempo = dados.tempo_min || 0;
-    const horas = Math.floor(tempo / 60);
-    const mins  = tempo % 60;
-    document.getElementById("tempo-display").textContent =
-        horas > 0 ? `${horas}h ${mins}m` : `${mins} min`;
+        const res = await fetch(
+            `${CLOUD}/api/pagamentos-pendentes/{{ parque_id }}`
+        );
 
-    document.getElementById("parque-display").textContent =
-        `#${dados.parque_id || "?"}`;
+        const data = await res.json();
 
-    document.getElementById("preco-display").textContent =
-        parseFloat(dados.preco || 0).toFixed(2);
+        if (!data.ok) {
+
+            document.getElementById("conteudo").style.display = "none";
+            document.getElementById("sem-dados").style.display = "block";
+
+            carroAtual = null;
+
+            resetBtn();
+            document.getElementById("sucesso").classList.remove("show");
+
+            return;
+        }
+
+        carroAtual = data;
+
+        document.getElementById("conteudo").style.display = "block";
+        document.getElementById("sem-dados").style.display = "none";
+
+        document.getElementById("matricula-display").textContent =
+            data.matricula;
+
+        const tempo = data.tempo || 0;
+
+        const horas = Math.floor(tempo / 60);
+        const mins = tempo % 60;
+
+        document.getElementById("tempo-display").textContent =
+            horas > 0 ? `${horas}h ${mins}m` : `${mins} min`;
+
+        document.getElementById("parque-display").textContent =
+            "#{{ parque_id }}";
+
+        document.getElementById("preco-display").textContent =
+            parseFloat(data.preco).toFixed(2);
+
+    } catch (e) {
+
+        console.error(e);
+
+        document.getElementById("conteudo").style.display = "none";
+        document.getElementById("sem-dados").style.display = "block";
+    }
 }
 
 // =========================
 // CONFIRMAR PAGAMENTO
 // =========================
 // const CLOUD = `http://${window.location.hostname}:5000`;
-let CLOUD = null;
-
-async function getCloud() {
-    if (CLOUD) return CLOUD;
-
-    const res = await fetch("/ip.txt");
-    let ip = (await res.text()).trim();
-
-    if (!/^https?:\/\//i.test(ip)) {
-        ip = "http://" + ip;
-    }
-
-    const url = new URL(ip);
-
-    if (!url.port) {
-        url.port = "5000";
-    }
-
-    CLOUD = url.origin;
-    return CLOUD;
-}
+const CLOUD = "{{ cloud_url }}";
 
 async function confirmarPagamento() {
-    const dados = JSON.parse(sessionStorage.getItem("pagamento") || "{}");
-
-    if (!dados.matricula) return;
+    
+    if (!carroAtual) {
+        return;
+    }
 
     // estado loading
     document.getElementById("btn-pagar").disabled = true;
@@ -503,35 +513,32 @@ async function confirmarPagamento() {
     document.getElementById("btn-texto").textContent = "A processar...";
     document.getElementById("erro-box").classList.remove("show");
 
-    const base = await getCloud();
-
     try {
-        // buscar carro_id via api/pagamento
-        const r1 = await fetch(
-            `${base}/api/pagamento/${dados.parque_id}?matricula=${dados.matricula}`
-        );
-        const info = await r1.json();
-
-        if (!info.ok) {
-            mostrarErro(info.msg || "Pagamento não encontrado.");
-            resetBtn();
-            return;
-        }
-
-        // confirmar pagamento
         const r2 = await fetch(
-            `${base}/payment/confirm/${info.carro_id}`,
-            { method: "POST" }
+            `${CLOUD}/payment/confirm/${carroAtual.carro_id}`,
+            {
+                method: "POST"
+            }
         );
+
         const resultado = await r2.json();
 
         if (resultado.ok) {
-            sessionStorage.removeItem("pagamento");
-            document.getElementById("btn-pagar").style.display  = "none";
-            document.querySelector(".btn-voltar").style.display = "none";
+
             document.getElementById("data-pag").textContent =
                 resultado.data_pagamento?.substring(0, 19).replace("T", " ") || "";
+
             document.getElementById("sucesso").classList.add("show");
+
+            setTimeout(() => {
+
+                document.getElementById("sucesso").classList.remove("show");
+
+                resetBtn();
+
+                carregarPagamento();
+
+            }, 2000);
         } else {
             mostrarErro(resultado.msg || "Erro ao confirmar pagamento.");
             resetBtn();
@@ -555,6 +562,12 @@ function resetBtn() {
     document.getElementById("btn-icon").textContent = "💳";
     document.getElementById("btn-texto").textContent = "Confirmar Pagamento";
 }
+carregarPagamento();
+
+setInterval(
+    carregarPagamento,
+    3000
+);
 </script>
 </body>
 </html>
