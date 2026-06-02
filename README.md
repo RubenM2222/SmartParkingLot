@@ -60,10 +60,34 @@ python app.py
 
 ## 🍓 Raspberry Pi
 
-sudo apt install tesseract-ocr  
+sudo apt install tesseract-ocr 
 
 (nao me lembro se preciso do pillow)pip3 install flask flask-cors pytesseract opencv-python pillow 
 
 pip install Flask flask-cors pytesseract opencv-python numpy requests
 
-python3 server.py  
+python3 server.py 
+
+### No rapsberry
+Install venv support if needed
+sudo apt update
+sudo apt install python3-venv python3-full
+
+Create a virtual environment
+python3 -m venv ~/edge_iot_pi
+
+Activate it
+source ~/edge_iot_pi/bin/activate
+
+Upgrade pip
+pip install --upgrade pip
+
+Install your packages
+pip install Flask flask-cors pytesseract opencv-python numpy requests
+
+sudo apt install tesseract-ocr 
+
+**after**
+cd ~/edge_iot_pi
+source venv/bin/activate
+python app.py
