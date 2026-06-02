@@ -129,14 +129,12 @@ function saida() {
             throw new Error(resultado.msg || "Erro na saída do servidor.");
         }
 
-        sessionStorage.setItem("pagamento", JSON.stringify({
-            matricula: data.matricula,
-            tempo_min: resultado.tempo_min,
-            preco: resultado.preco,
-            parque_id: parqueId
-        }));
-
-        window.location.href = "/pagamento";
+        alert(
+            "✅ Saída registada!\\n\\n" +
+            "Matrícula: " + data.matricula +
+            "\\nDuração: " + resultado.tempo_min + " min" +
+            "\\nPreço: " + resultado.preco + "€"
+        );
     })
     .catch(err => {
         console.error(err);

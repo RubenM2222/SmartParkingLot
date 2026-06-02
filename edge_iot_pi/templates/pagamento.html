@@ -355,6 +355,57 @@
         font-size: 14px;
         margin-bottom: 24px;
     }
+
+    /* ── AGUARDANDO ── */
+    .aguardando {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 60px 20px;
+        min-height: 400px;
+    }
+
+    .aguardando.show { display: flex; }
+
+    .waiting-icon {
+        width: 80px; height: 80px;
+        background: linear-gradient(135deg, var(--green-light), var(--green));
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 40px;
+        margin-bottom: 28px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.8; }
+    }
+
+    .aguardando h2 {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text);
+        margin-bottom: 12px;
+    }
+
+    .aguardando p {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 20px;
+        max-width: 300px;
+    }
+
+    .waiting-spinner {
+        width: 24px; height: 24px;
+        border: 3px solid var(--border);
+        border-top-color: var(--green);
+        border-radius: 50%;
+        animation: spin .8s linear infinite;
+        margin-top: 12px;
+    }
 </style>
 </head>
 <body>
@@ -364,6 +415,14 @@
     <div class="topbar">
         <div class="brand">Smart Parking</div>
         <div class="clock" id="clock">--:--:--</div>
+    </div>
+
+    <!-- AGUARDANDO -->
+    <div class="aguardando" id="aguardando">
+        <div class="waiting-icon">⏱️</div>
+        <h2>À Aguardar Saída</h2>
+        <p>Pronto para processar o próximo pagamento...</p>
+        <div class="waiting-spinner"></div>
     </div>
 
     <!-- SEM DADOS -->
@@ -442,39 +501,91 @@ tick();
 // =========================
 // CARREGAR DADOS
 // =========================
-const raw = sessionStorage.getItem("pagamento");
+let ultimoDadosExibido = null;
+const OCR_SERVER = `http://${window.location.hostname}:5001`;
 
-if (!raw) {
-    document.getElementById("conteudo").style.display = "none";
-    document.getElementById("sem-dados").style.display = "block";
-} else {
-    const dados = JSON.parse(raw);
-
-    document.getElementById("matricula-display").textContent =
-        dados.matricula || "——";
-
-    const tempo = dados.tempo_min || 0;
-    const horas = Math.floor(tempo / 60);
-    const mins  = tempo % 60;
-    document.getElementById("tempo-display").textContent =
-        horas > 0 ? `${horas}h ${mins}m` : `${mins} min`;
-
-    document.getElementById("parque-display").textContent =
-        `#${dados.parque_id || "?"}`;
-
-    document.getElementById("preco-display").textContent =
-        parseFloat(dados.preco || 0).toFixed(2);
+function atualizarPagamento() {
+    const parqueId = new URLSearchParams(window.location.search).get("parque_id") || 1;
+    
+    fetch(`${OCR_SERVER}/api/ultima-saida?parque_id=${parqueId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.ok || !data.dados) {
+                // Sem dados - mostrar aguardando se já houve dados antes
+                if (ultimoDadosExibido) {
+                    document.getElementById("conteudo").style.display = "none";
+                    document.getElementById("aguardando").classList.add("show");
+                    document.getElementById("sem-dados").style.display = "none";
+                } else {
+                    document.getElementById("conteudo").style.display = "none";
+                    document.getElementById("aguardando").classList.remove("show");
+                    document.getElementById("sem-dados").style.display = "block";
+                }
+                return;
+            }
+            
+            const dados = data.dados;
+            
+            // Apenas atualizar se for diferente do anterior
+            if (ultimoDadosExibido && ultimoDadosExibido.matricula === dados.matricula) {
+                return;
+            }
+            
+            ultimoDadosExibido = dados;
+            
+            document.getElementById("conteudo").style.display = "block";
+            document.getElementById("sem-dados").style.display = "none";
+            document.getElementById("aguardando").classList.remove("show");
+            document.getElementById("sucesso").classList.remove("show");
+            document.getElementById("btn-pagar").style.display = "flex";
+            document.querySelector(".btn-voltar").style.display = "block";
+            
+            document.getElementById("matricula-display").textContent =
+                dados.matricula || "——";
+            
+            const tempo = dados.tempo_min || 0;
+            const horas = Math.floor(tempo / 60);
+            const mins  = tempo % 60;
+            document.getElementById("tempo-display").textContent =
+                horas > 0 ? `${horas}h ${mins}m` : `${mins} min`;
+            
+            document.getElementById("parque-display").textContent =
+                `#${dados.parque_id || "?"}`;
+            
+            document.getElementById("preco-display").textContent =
+                parseFloat(dados.preco || 0).toFixed(2);
+        })
+        .catch(err => {
+            console.error("Erro a buscar última saída:", err);
+            if (ultimoDadosExibido) {
+                document.getElementById("conteudo").style.display = "none";
+                document.getElementById("aguardando").classList.add("show");
+                document.getElementById("sem-dados").style.display = "none";
+            } else {
+                document.getElementById("conteudo").style.display = "none";
+                document.getElementById("aguardando").classList.remove("show");
+                document.getElementById("sem-dados").style.display = "block";
+            }
+        });
 }
+
+// Carregar dados inicialmente
+atualizarPagamento();
+
+// Atualizar a cada 2 segundos
+let pollingInterval = setInterval(atualizarPagamento, 2000);
 
 // =========================
 // CONFIRMAR PAGAMENTO
 // =========================
 const CLOUD = `http://${window.location.hostname}:5000`;
+let pagamentoEmProcesso = false;
 
 async function confirmarPagamento() {
-    const dados = JSON.parse(sessionStorage.getItem("pagamento") || "{}");
-
-    if (!dados.matricula) return;
+    if (!ultimoDadosExibido || pagamentoEmProcesso) return;
+    
+    pagamentoEmProcesso = true;
+    const dados = ultimoDadosExibido;
 
     // estado loading
     document.getElementById("btn-pagar").disabled = true;
@@ -492,6 +603,7 @@ async function confirmarPagamento() {
         if (!info.ok) {
             mostrarErro(info.msg || "Pagamento não encontrado.");
             resetBtn();
+            pagamentoEmProcesso = false;
             return;
         }
 
@@ -503,20 +615,50 @@ async function confirmarPagamento() {
         const resultado = await r2.json();
 
         if (resultado.ok) {
-            sessionStorage.removeItem("pagamento");
+            // Parar o polling temporariamente
+            clearInterval(pollingInterval);
+            
+            // Resetar dados ANTES de mostrar sucesso
+            ultimoDadosExibido = null;
+            
+            // Esconder os botões
             document.getElementById("btn-pagar").style.display  = "none";
             document.querySelector(".btn-voltar").style.display = "none";
+            
+            // Mostrar sucesso
             document.getElementById("data-pag").textContent =
                 resultado.data_pagamento?.substring(0, 19).replace("T", " ") || "";
             document.getElementById("sucesso").classList.add("show");
+            
+            // Esperar 5 segundos e voltar ao início
+            setTimeout(() => {
+                document.getElementById("conteudo").style.display = "none";
+                document.getElementById("aguardando").classList.add("show");
+                document.getElementById("sem-dados").style.display = "none";
+                document.getElementById("sucesso").classList.remove("show");
+                pagamentoEmProcesso = false;
+                
+                // Reiniciar polling
+                pollingInterval = setInterval(atualizarPagamento, 2000);
+                atualizarPagamento();
+            }, 5000);
         } else {
             mostrarErro(resultado.msg || "Erro ao confirmar pagamento.");
             resetBtn();
+            pagamentoEmProcesso = false;
+            // Reiniciar polling em caso de erro
+            clearInterval(pollingInterval);
+            pollingInterval = setInterval(atualizarPagamento, 2000);
         }
 
     } catch (e) {
+        console.error("Erro:", e);
         mostrarErro("Sem ligação ao servidor cloud.");
         resetBtn();
+        pagamentoEmProcesso = false;
+        // Reiniciar polling em caso de erro
+        clearInterval(pollingInterval);
+        pollingInterval = setInterval(atualizarPagamento, 2000);
     }
 }
 

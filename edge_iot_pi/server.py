@@ -109,7 +109,9 @@ def ocr():
 # --- helper function to get target api url ---
 def get_cloud_base_url():
     """Reads the target server IP/URL from a local txt file."""
-    filename = "ip.txt"
+    # Usar caminho relativo ao script, não ao working directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    filename = os.path.join(script_dir, "ip.txt")
     default_url = "http://127.0.0.1:5000"
     
     if not os.path.exists(filename):
@@ -148,5 +150,24 @@ def get_parque_id():
 @app.route("/pagamento")
 def pagamento():
     return render_template("pagamento.html")
+
+@app.route("/api/ultima-saida")
+def ultima_saida():
+    """Retorna os dados da última saída registada (do servidor cloud)"""
+    try:
+        base_url = get_cloud_base_url()
+        parque_id = get_parque_id()
+        
+        if not parque_id:
+            parque_id = request.args.get("parque_id", 1, type=int)
+        
+        # Buscar última saída do servidor cloud
+        response = requests.get(
+            f"{base_url}/api/ultima-saida/{parque_id}",
+            timeout=3
+        )
+        return response.json()
+    except Exception as e:
+        return jsonify({"ok": False, "msg": str(e)})
 
 app.run(host='0.0.0.0', port=5001)

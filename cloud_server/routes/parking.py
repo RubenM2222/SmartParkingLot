@@ -293,3 +293,52 @@ def estado_real(parque_id):
         "total": total,
         "sensores": sensores
     })
+
+
+# =========================
+# ÚLTIMA SAÍDA (para edge_iot_pi)
+# =========================
+@parking_bp.route("/api/ultima-saida/<int:parque_id>")
+def ultima_saida(parque_id):
+    """Retorna a última saída NÃO PAGA para um parque"""
+    
+    conn = db()
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    
+    c.execute("""
+        SELECT 
+            id,
+            matricula,
+            entrada,
+            saida,
+            tempo,
+            preco
+        FROM carros
+        WHERE parque_id = ?
+        AND ativo = 0
+        AND pago = 0
+        ORDER BY saida DESC
+        LIMIT 1
+    """, (parque_id,))
+    
+    ultima = c.fetchone()
+    conn.close()
+    
+    if not ultima:
+        return jsonify({
+            "ok": False,
+            "msg": "À aguardar por nova saída",
+            "dados": None
+        })
+    
+    return jsonify({
+        "ok": True,
+        "dados": {
+            "carro_id": ultima["id"],
+            "matricula": ultima["matricula"],
+            "tempo_min": ultima["tempo"],
+            "preco": round(ultima["preco"], 2),
+            "parque_id": parque_id
+        }
+    })
