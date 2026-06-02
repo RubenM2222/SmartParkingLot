@@ -169,6 +169,44 @@ def get_metrics():
             "capacidade": parque["capacidade"]
         })
 
+    c.execute("""
+        SELECT
+            strftime('%Y-%m', data) as mes,
+            SUM(valor) as receita
+        FROM pagamentos
+        WHERE data IS NOT NULL
+        GROUP BY strftime('%Y-%m', data)
+        ORDER BY mes DESC
+        LIMIT 12
+    """)
+
+    receita_mensal = []
+    for row in c.fetchall():
+        receita_mensal.append({
+            "mes": row["mes"],
+            "receita": round(row["receita"] or 0, 2)
+        })
+    receita_mensal.reverse()
+
+    c.execute("""
+        SELECT
+            strftime('%Y-%m', entrada) as mes,
+            COUNT(*) as total
+        FROM carros
+        WHERE entrada IS NOT NULL AND ativo=0
+        GROUP BY strftime('%Y-%m', entrada)
+        ORDER BY mes DESC
+        LIMIT 12
+    """)
+
+    carros_mensal = []
+    for row in c.fetchall():
+        carros_mensal.append({
+            "mes": row["mes"],
+            "carros": row["total"]
+        })
+    carros_mensal.reverse()
+
     conn.close()
 
     return jsonify({
@@ -179,7 +217,9 @@ def get_metrics():
         "receita_total": round(receita_total, 2),
         "tokens_usados": tokens_usados,
         "tokens_disponiveis": tokens_disponiveis,
-        "ocupacao_parques": ocupacao_parques
+        "ocupacao_parques": ocupacao_parques,
+        "receita_mensal": receita_mensal,
+        "carros_mensal": carros_mensal
     })
 
 

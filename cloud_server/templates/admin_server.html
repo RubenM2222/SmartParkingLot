@@ -5,6 +5,7 @@
 
 <title>Server Admin Dashboard</title>
 
+
 <style>
 
 body{
@@ -596,57 +597,12 @@ button{
 
     <!-- MÉTRICAS -->
 
-    <div id="metricas" class="tab-content">
-
-        <div class="metric-grid">
-
-            <div class="metric-card">
-                <div class="metric-label">Total de Parques</div>
-                <div class="metric-value" id="total-parques">-</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-label">Admins</div>
-                <div class="metric-value" id="total-admins">-</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-label">Carros Estacionados</div>
-                <div class="metric-value" id="carros-estacionados">-</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-label">Reservas Ativas</div>
-                <div class="metric-value" id="reservas-ativas">-</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-label">Receita Total</div>
-                <div class="metric-value" id="receita-total">-</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-label">Tokens Disponíveis</div>
-                <div class="metric-value" id="tokens-disponivel">-</div>
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <h3>Ocupação dos Parques</h3>
-
-            <div class="occupancy-chart" id="occupancy-container">
-                <p>Carregando...</p>
-            </div>
-
-        </div>
-
-    </div>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+
 
 function openTab(tab){
 
@@ -897,57 +853,137 @@ function criarToken() {
     });
 }
 
-/* =========================
-   MÉTRICAS
-========================= */
-function carregarMetricas() {
+// /* =========================
+//    MÉTRICAS
+// ========================= */
+// function carregarMetricas() {
 
-    fetch("/admin/metrics")
-        .then(r => r.json())
-        .then(data => {
+//     fetch("/admin/metrics")
+//         .then(r => r.json())
+//         .then(data => {
 
-            document.getElementById("total-parques").textContent = data.total_parques;
-            document.getElementById("total-admins").textContent = data.total_admins;
-            document.getElementById("carros-estacionados").textContent = data.carros_estacionados;
-            document.getElementById("reservas-ativas").textContent = data.reservas_ativas;
-            document.getElementById("receita-total").textContent = "€" + data.receita_total;
-            document.getElementById("tokens-disponivel").textContent = data.tokens_disponiveis;
+//             document.getElementById("total-parques").textContent = data.total_parques;
+//             document.getElementById("total-admins").textContent = data.total_admins;
+//             document.getElementById("carros-estacionados").textContent = data.carros_estacionados;
+//             document.getElementById("reservas-ativas").textContent = data.reservas_ativas;
+//             document.getElementById("receita-total").textContent = "€" + data.receita_total;
+//             document.getElementById("tokens-disponivel").textContent = data.tokens_disponiveis;
 
-            const occupancyContainer = document.getElementById("occupancy-container");
-            occupancyContainer.innerHTML = "";
+//             const occupancyContainer = document.getElementById("occupancy-container");
+//             occupancyContainer.innerHTML = "";
 
-            data.ocupacao_parques.forEach(parque => {
-                const ocupacao = parque.ocupacao;
-                const fillClass = ocupacao >= 80 ? "red" : ocupacao >= 50 ? "yellow" : "green";
+//             data.ocupacao_parques.forEach(parque => {
+//                 const ocupacao = parque.ocupacao;
+//                 const fillClass = ocupacao >= 80 ? "red" : ocupacao >= 50 ? "yellow" : "green";
 
-                const raio = 75;
-                const circunferencia = 2 * Math.PI * raio;
-                const strokeDashoffset = circunferencia * (1 - ocupacao / 100);
+//                 const raio = 75;
+//                 const circunferencia = 2 * Math.PI * raio;
+//                 const strokeDashoffset = circunferencia * (1 - ocupacao / 100);
 
-                const item = document.createElement("div");
-                item.className = "occupancy-item";
-                item.innerHTML = `
-                    <div class="occupancy-title">${parque.nome}</div>
-                    <div class="occupancy-gauge">
-                        <svg viewBox="0 0 160 160">
-                            <circle cx="80" cy="80" r="${raio}" class="gauge-background"></circle>
-                            <circle cx="80" cy="80" r="${raio}" class="gauge-fill ${fillClass}" style="stroke-dashoffset:${strokeDashoffset}"></circle>
-                        </svg>
-                        <div class="gauge-center">
-                            <div class="gauge-value">${ocupacao}%</div>
-                            <div class="gauge-label">Ocupação</div>
-                        </div>
-                    </div>
-                    <div class="occupancy-info">${parque.carros} / ${parque.capacidade} lugares</div>
-                `;
+//                 const item = document.createElement("div");
+//                 item.className = "occupancy-item";
+//                 item.innerHTML = `
+//                     <div class="occupancy-title">${parque.nome}</div>
+//                     <div class="occupancy-gauge">
+//                         <svg viewBox="0 0 160 160">
+//                             <circle cx="80" cy="80" r="${raio}" class="gauge-background"></circle>
+//                             <circle cx="80" cy="80" r="${raio}" class="gauge-fill ${fillClass}" style="stroke-dashoffset:${strokeDashoffset}"></circle>
+//                         </svg>
+//                         <div class="gauge-center">
+//                             <div class="gauge-value">${ocupacao}%</div>
+//                             <div class="gauge-label">Ocupação</div>
+//                         </div>
+//                     </div>
+//                     <div class="occupancy-info">${parque.carros} / ${parque.capacidade} lugares</div>
+//                 `;
 
-                occupancyContainer.appendChild(item);
-            });
+//                 occupancyContainer.appendChild(item);
+//             });
 
-        })
-        .catch(err => {
-            console.error(err);
-            document.getElementById("occupancy-container").innerHTML = "<p>Erro ao carregar métricas</p>";
-        });
-}
+//             renderGraficoReceita(data.receita_mensal);
+//             renderGraficoCarros(data.carros_mensal);
+//         })
+//         .catch(err => {
+//             console.error(err);
+//             document.getElementById("occupancy-container").innerHTML = "<p>Erro ao carregar métricas</p>";
+//         });
+// }
+
+// function renderGraficoReceita(dados) {
+
+//     const meses = dados.map(d => d.mes);
+//     const valores = dados.map(d => d.receita);
+
+//     const ctx = document.getElementById("chart-receita").getContext("2d");
+
+//     new Chart(ctx, {
+//         type: "bar",
+//         data: {
+//             labels: meses,
+//             datasets: [{
+//                 label: "Receita (€)",
+//                 data: valores,
+//                 backgroundColor: "#2563eb",
+//                 borderColor: "#1e40af",
+//                 borderWidth: 1
+//             }]
+//         },
+//         options: {
+//             responsive: true,
+//             plugins: {
+//                 legend: {
+//                     display: false
+//                 }
+//             },
+//             scales: {
+//                 y: {
+//                     beginAtZero: true,
+//                     title: {
+//                         display: true,
+//                         text: "Euros"
+//                     }
+//                 }
+//             }
+//         }
+//     });
+// }
+
+// function renderGraficoCarros(dados) {
+
+//     const meses = dados.map(d => d.mes);
+//     const valores = dados.map(d => d.carros);
+
+//     const ctx = document.getElementById("chart-carros").getContext("2d");
+
+//     new Chart(ctx, {
+//         type: "bar",
+//         data: {
+//             labels: meses,
+//             datasets: [{
+//                 label: "Carros Estacionados",
+//                 data: valores,
+//                 backgroundColor: "#10b981",
+//                 borderColor: "#047857",
+//                 borderWidth: 1
+//             }]
+//         },
+//         options: {
+//             responsive: true,
+//             plugins: {
+//                 legend: {
+//                     display: false
+//                 }
+//             },
+//             scales: {
+//                 y: {
+//                     beginAtZero: true,
+//                     title: {
+//                         display: true,
+//                         text: "Quantidade"
+//                     }
+//                 }
+//             }
+//         }
+//     });
+// }
 </script>
