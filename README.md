@@ -96,4 +96,4 @@ python app.py
 # Importante
 
 para aceder ao pagamento tem de ser 
-http://ip:5001/pagamento&parque_id=1
+http://ip:5001/pagamento?parque_id=1
