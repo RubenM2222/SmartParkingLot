@@ -2,3 +2,113 @@
 [2026-06-02 17:14:06] PARQUE_CRIADO - Nome: assafdasf, Capacidade: 3134, Localização: fdsfdf
 [2026-06-02 17:19:48] PARQUE_REMOVIDO - ID: 4, Nome: assafdasf
 [2026-06-02 17:20:36] PARQUE_REMOVIDO - ID: 3, Nome: asff
+[2026-06-02 17:56:49] PARQUE_CRIADO - Nome: sdasd, Capacidade: 12, Localização: sadasd
+[2026-06-02 17:56:55] PARQUE_CRIADO - Nome: asfafs, Capacidade: 233, Localização: dfdfd
+[2026-06-02 17:57:46] PARQUE_CRIADO - Nome: fff, Capacidade: 1341, Localização: asfasf
+[2026-06-02 17:57:50] PARQUE_CRIADO - Nome: wrqwr, Capacidade: 13, Localização: rqrq
+[2026-06-02 17:57:53] PARQUE_CRIADO - Nome: rqr, Capacidade: , Localização: wqer
+[2026-06-02 17:57:59] PARQUE_CRIADO - Nome: , Capacidade: , Localização: 
+[2026-06-02 17:58:10] PARQUE_REMOVIDO - ID: 10, Nome: 
+[2026-06-02 17:58:18] PARQUE_REMOVIDO - ID: 9, Nome: rqr
+[2026-06-02 17:58:35] PARK_ADMIN_CRIADO - Username: , Nome: 
+[2026-06-02 17:58:44] PARK_ADMIN_REMOVIDO - ID: 3, Username: 
+[2026-06-02 18:10:12] PARQUE_CRIADO - Nome: Parque Verde 1, Capacidade: 2467, Localização: Lisboa
+[2026-06-02 18:10:12] PARQUE_CRIADO - Nome: Parque do Lago 2, Capacidade: 4307, Localização: Faro
+[2026-06-02 18:10:12] PARQUE_CRIADO - Nome: Parque Central 3, Capacidade: 1598, Localização: Coimbra
+[2026-06-02 18:10:12] PARQUE_CRIADO - Nome: Parque das Flores 4, Capacidade: 4225, Localização: Coimbra
+[2026-06-02 18:10:12] PARQUE_CRIADO - Nome: Parque das Flores 5, Capacidade: 2276, Localização: Aveiro
+[2026-06-02 18:10:12] PARQUE_CRIADO - Nome: Parque das Flores 6, Capacidade: 3872, Localização: Aveiro
+[2026-06-02 18:10:12] PARQUE_CRIADO - Nome: Parque Verde 7, Capacidade: 2396, Localização: Aveiro
+[2026-06-02 18:10:12] PARQUE_CRIADO - Nome: Parque Solar 8, Capacidade: 111, Localização: Braga
+[2026-06-02 18:10:12] PARQUE_CRIADO - Nome: Parque Solar 9, Capacidade: 4283, Localização: Porto
+[2026-06-02 18:10:12] PARQUE_CRIADO - Nome: Parque das Flores 10, Capacidade: 1318, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 11, Capacidade: 460, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 12, Capacidade: 4202, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 13, Capacidade: 1850, Localização: Coimbra
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 14, Capacidade: 4389, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 15, Capacidade: 4321, Localização: Braga
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 16, Capacidade: 2743, Localização: Faro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 17, Capacidade: 2068, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 18, Capacidade: 2684, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 19, Capacidade: 982, Localização: Setúbal
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 20, Capacidade: 302, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 21, Capacidade: 3054, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 22, Capacidade: 69, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 23, Capacidade: 3836, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 24, Capacidade: 1912, Localização: Braga
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 25, Capacidade: 2865, Localização: Braga
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 26, Capacidade: 292, Localização: Coimbra
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 27, Capacidade: 3089, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 28, Capacidade: 3244, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 29, Capacidade: 783, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 30, Capacidade: 4190, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 31, Capacidade: 1150, Localização: Coimbra
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 32, Capacidade: 769, Localização: Setúbal
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 33, Capacidade: 3220, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 34, Capacidade: 833, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 35, Capacidade: 3066, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 36, Capacidade: 1399, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 37, Capacidade: 314, Localização: Braga
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 38, Capacidade: 4544, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 39, Capacidade: 1484, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 40, Capacidade: 3356, Localização: Setúbal
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 41, Capacidade: 883, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 42, Capacidade: 140, Localização: Setúbal
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 43, Capacidade: 2405, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 44, Capacidade: 964, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 45, Capacidade: 680, Localização: Setúbal
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 46, Capacidade: 3919, Localização: Braga
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 47, Capacidade: 3948, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 48, Capacidade: 1718, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 49, Capacidade: 4186, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 50, Capacidade: 462, Localização: Coimbra
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 51, Capacidade: 2709, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 52, Capacidade: 3284, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 53, Capacidade: 4596, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 54, Capacidade: 4286, Localização: Braga
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 55, Capacidade: 2079, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 56, Capacidade: 4125, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 57, Capacidade: 4989, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 58, Capacidade: 4336, Localização: Braga
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 59, Capacidade: 2867, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 60, Capacidade: 1993, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 61, Capacidade: 2569, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 62, Capacidade: 2006, Localização: Coimbra
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 63, Capacidade: 4519, Localização: Faro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 64, Capacidade: 975, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 65, Capacidade: 2737, Localização: Coimbra
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 66, Capacidade: 704, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 67, Capacidade: 3690, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 68, Capacidade: 2722, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 69, Capacidade: 4448, Localização: Setúbal
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 70, Capacidade: 1826, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 71, Capacidade: 3524, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 72, Capacidade: 1340, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 73, Capacidade: 3154, Localização: Setúbal
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 74, Capacidade: 867, Localização: Braga
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 75, Capacidade: 776, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 76, Capacidade: 1133, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 77, Capacidade: 2648, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 78, Capacidade: 484, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 79, Capacidade: 355, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 80, Capacidade: 2327, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 81, Capacidade: 2476, Localização: Faro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 82, Capacidade: 3973, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 83, Capacidade: 2918, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 84, Capacidade: 506, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 85, Capacidade: 4959, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 86, Capacidade: 1058, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Verde 87, Capacidade: 4948, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 88, Capacidade: 1049, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 89, Capacidade: 602, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 90, Capacidade: 3332, Localização: Coimbra
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 91, Capacidade: 1660, Localização: Aveiro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 92, Capacidade: 4650, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque do Lago 93, Capacidade: 4726, Localização: Lisboa
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 94, Capacidade: 1494, Localização: Braga
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque das Flores 95, Capacidade: 646, Localização: Porto
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 96, Capacidade: 3744, Localização: Setúbal
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Central 97, Capacidade: 1191, Localização: Coimbra
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque da Cidade 98, Capacidade: 1942, Localização: Faro
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 99, Capacidade: 1278, Localização: Leiria
+[2026-06-02 18:10:13] PARQUE_CRIADO - Nome: Parque Solar 100, Capacidade: 2298, Localização: Setúbal
