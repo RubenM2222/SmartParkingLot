@@ -90,7 +90,7 @@ sudo apt install tesseract-ocr
 **after**
 cd ~/edge_iot_pi
 source venv/bin/activate
-python app.py
+python server.py
 
 
 # Importante
