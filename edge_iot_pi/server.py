@@ -105,14 +105,6 @@ def ocr():
         "servidor": cloud_data
     })
 
-def get_parque_id():
-    hostname = socket.gethostname()
-
-    match = re.search(r'parking(\d+)', hostname)
-    if match:
-        return int(match.group(1))
-
-    return None
 
 # --- helper function to get target api url ---
 def get_cloud_base_url():
