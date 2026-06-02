@@ -553,13 +553,6 @@ async function carregarPagamento() {
         document.getElementById("sem-dados").style.display = "block";
     }
 }
-
-// Carregar dados inicialmente
-atualizarPagamento();
-
-// Atualizar a cada 2 segundos
-let pollingInterval = setInterval(atualizarPagamento, 2000);
-
 // =========================
 // CONFIRMAR PAGAMENTO
 // =========================
