@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 #pytesseract.pytesseract.tesseract_cmd = r'C:\Users\2222068\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
-pytesseract.pytesseract.tesseract_cmd = r'C:\Users\ruben\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Users\ruben\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 print(pytesseract.get_tesseract_version())
 
 @app.route("/")
@@ -109,7 +109,8 @@ def ocr():
 # --- helper function to get target api url ---
 def get_cloud_base_url():
     """Reads the target server IP/URL from a local txt file."""
-    filename = "ip.txt"
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    filename = os.path.join(base_dir, "ip.txt")
     default_url = "http://127.0.0.1:5000"
     
     if not os.path.exists(filename):
@@ -147,6 +148,19 @@ def get_parque_id():
 
 @app.route("/pagamento")
 def pagamento():
-    return render_template("pagamento.html")
+    tipo = request.args.get("tipo", "entrada")
+
+    parque_id = get_parque_id()
+    if not parque_id:
+        parque_id = request.args.get("parque_id", type=int)
+
+    if not parque_id:
+        return jsonify({
+        "erro": "Parque não identificado (hostname inválido e sem fallback)"
+        }), 400
+    
+    base_url = get_cloud_base_url()
+    url = f"{base_url}/{tipo}/{parque_id}"
+    return render_template("pagamento.html", url=url)
 
 app.run(host='0.0.0.0', port=5001)

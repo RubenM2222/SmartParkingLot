@@ -469,7 +469,28 @@ if (!raw) {
 // =========================
 // CONFIRMAR PAGAMENTO
 // =========================
-const CLOUD = `http://${window.location.hostname}:5000`;
+// const CLOUD = `http://${window.location.hostname}:5000`;
+let CLOUD = null;
+
+async function getCloud() {
+    if (CLOUD) return CLOUD;
+
+    const res = await fetch("/ip.txt");
+    let ip = (await res.text()).trim();
+
+    if (!/^https?:\/\//i.test(ip)) {
+        ip = "http://" + ip;
+    }
+
+    const url = new URL(ip);
+
+    if (!url.port) {
+        url.port = "5000";
+    }
+
+    CLOUD = url.origin;
+    return CLOUD;
+}
 
 async function confirmarPagamento() {
     const dados = JSON.parse(sessionStorage.getItem("pagamento") || "{}");
@@ -482,10 +503,12 @@ async function confirmarPagamento() {
     document.getElementById("btn-texto").textContent = "A processar...";
     document.getElementById("erro-box").classList.remove("show");
 
+    const base = await getCloud();
+
     try {
         // buscar carro_id via api/pagamento
         const r1 = await fetch(
-            `${CLOUD}/api/pagamento/${dados.parque_id}?matricula=${dados.matricula}`
+            `${base}/api/pagamento/${dados.parque_id}?matricula=${dados.matricula}`
         );
         const info = await r1.json();
 
@@ -497,7 +520,7 @@ async function confirmarPagamento() {
 
         // confirmar pagamento
         const r2 = await fetch(
-            `${CLOUD}/payment/confirm/${info.carro_id}`,
+            `${base}/payment/confirm/${info.carro_id}`,
             { method: "POST" }
         );
         const resultado = await r2.json();
