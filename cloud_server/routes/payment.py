@@ -127,30 +127,44 @@ def confirmar_pagamento(carro_id):
 
     agora = datetime.now().isoformat()
 
-    # marcar pago
-    c.execute("""
-        UPDATE carros
-        SET pago = 1
-        WHERE id = ?
-    """, (carro_id,))
+    try:
+        # marcar pago
+        c.execute("""
+            UPDATE carros
+            SET pago = 1
+            WHERE id = ?
+        """, (carro_id,))
 
-    # guardar histórico pagamento
-    c.execute("""
-        INSERT INTO pagamentos (
+        # guardar histórico pagamento
+        c.execute("""
+            INSERT INTO pagamentos (
+                carro_id,
+                valor,
+                metodo,
+                data
+            )
+            VALUES (?, ?, ?, ?)
+        """, (
             carro_id,
-            valor,
-            metodo,
-            data
-        )
-        VALUES (?, ?, ?, ?)
-    """, (
-        carro_id,
-        carro["preco"],
-        "web",
-        agora
-    ))
+            carro["preco"],
+            "web",
+            agora
+        ))
 
-    conn.commit()
+        c.execute("""
+        DELETE FROM pagamentos_pendentes
+        WHERE carro_id = ?
+        """, (carro_id,))
+
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+
+        return jsonify({
+            "ok": False,
+            "msg": str(e)
+        }), 500
+
     conn.close()
 
     return jsonify({
@@ -197,4 +211,45 @@ def api_pagamento(parque_id):
     return jsonify({
         "ok": True,
         "carro_id": carro["id"]
+    })
+
+@payment_bp.route("/api/pagamentos-pendentes/<int:parque_id>")
+def pagamentos_pendentes(parque_id):
+
+    conn = db()
+    conn.row_factory = sqlite3.Row
+
+    c = conn.cursor()
+
+    c.execute("""
+        SELECT
+            pp.id,
+            c.id AS carro_id,
+            c.matricula,
+            c.preco,
+            c.tempo
+        FROM pagamentos_pendentes pp
+        JOIN carros c
+            ON c.id = pp.carro_id
+        WHERE c.parque_id = ?
+            AND c.pago = 0
+        ORDER BY pp.criado_em ASC
+        LIMIT 1
+    """, (parque_id,))
+
+    pagamento = c.fetchone()
+
+    conn.close()
+
+    if not pagamento:
+        return jsonify({
+            "ok": False
+        })
+
+    return jsonify({
+        "ok": True,
+        "carro_id": pagamento["carro_id"],
+        "matricula": pagamento["matricula"],
+        "tempo": pagamento["tempo"],
+        "preco": pagamento["preco"]
     })

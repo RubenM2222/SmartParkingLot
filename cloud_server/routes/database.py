@@ -133,6 +133,17 @@ def init():
         usado_em TEXT
     )
     ''')
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS pagamentos_pendentes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+        carro_id INTEGER NOT NULL UNIQUE,
+
+        criado_em TEXT NOT NULL,
+
+        FOREIGN KEY(carro_id) REFERENCES carros(id)
+    )
+    ''')
     
     # =========================
     # ADMIN DEFAULT
