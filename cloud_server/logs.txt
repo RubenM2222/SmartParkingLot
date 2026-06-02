@@ -1,0 +1,4 @@
+[2026-06-02 17:13:57] PARQUE_CRIADO - Nome: asff, Capacidade: 111, Localização: fdsfds
+[2026-06-02 17:14:06] PARQUE_CRIADO - Nome: assafdasf, Capacidade: 3134, Localização: fdsfdf
+[2026-06-02 17:19:48] PARQUE_REMOVIDO - ID: 4, Nome: assafdasf
+[2026-06-02 17:20:36] PARQUE_REMOVIDO - ID: 3, Nome: asff

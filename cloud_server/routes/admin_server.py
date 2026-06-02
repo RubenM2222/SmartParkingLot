@@ -2,6 +2,7 @@ import sqlite3
 from flask import Blueprint, request, jsonify, render_template
 from .database import db
 from .auth import login_required
+from utils.logger import log_action, get_logs
 import secrets
 import string
 
@@ -254,6 +255,8 @@ def criar_parque():
     conn.commit()
     conn.close()
 
+    log_action("PARQUE_CRIADO", f"Nome: {nome}, Capacidade: {capacidade}, Localização: {localizacao}")
+
     return jsonify({
         "ok": True,
         "msg": "Parque criado"
@@ -269,6 +272,10 @@ def remover_parque(parque_id):
     conn = db()
     c = conn.cursor()
 
+    c.execute("SELECT nome FROM parques WHERE id = ?", (parque_id,))
+    parque = c.fetchone()
+    parque_nome = parque["nome"] if parque else "Desconhecido"
+
     c.execute("""
         DELETE FROM parques
         WHERE id = ?
@@ -276,6 +283,8 @@ def remover_parque(parque_id):
 
     conn.commit()
     conn.close()
+
+    log_action("PARQUE_REMOVIDO", f"ID: {parque_id}, Nome: {parque_nome}")
 
     return jsonify({
         "ok": True,
@@ -332,6 +341,8 @@ def criar_admin():
     conn.commit()
     conn.close()
 
+    log_action("PARK_ADMIN_CRIADO", f"Username: {username}, Nome: {nome}")
+
     return jsonify({
         "ok": True,
         "msg": "Administrador criado"
@@ -344,6 +355,10 @@ def remover_admin(admin_id):
 
     conn = db()
     c = conn.cursor()
+
+    c.execute("SELECT username FROM utilizadores WHERE id = ?", (admin_id,))
+    admin = c.fetchone()
+    admin_username = admin["username"] if admin else "Desconhecido"
 
     c.execute("""
         DELETE FROM admin_parques
@@ -358,6 +373,8 @@ def remover_admin(admin_id):
 
     conn.commit()
     conn.close()
+
+    log_action("PARK_ADMIN_REMOVIDO", f"ID: {admin_id}, Username: {admin_username}")
 
     return jsonify({
         "ok": True
@@ -408,8 +425,18 @@ def assign_admin():
         parque_id
     ))
 
+    c.execute("SELECT username FROM utilizadores WHERE id = ?", (admin_id,))
+    admin = c.fetchone()
+    admin_username = admin["username"] if admin else "Desconhecido"
+
+    c.execute("SELECT nome FROM parques WHERE id = ?", (parque_id,))
+    parque = c.fetchone()
+    parque_nome = parque["nome"] if parque else "Desconhecido"
+
     conn.commit()
     conn.close()
+
+    log_action("ADMIN_ASSOCIADO_PARQUE", f"Admin: {admin_username}, Parque: {parque_nome}")
 
     return jsonify({
         "ok": True,
@@ -491,6 +518,8 @@ def criar_token():
 
     conn.commit()
     conn.close()
+
+    log_action("TOKEN_GERADO", f"Token: {token}, Max Parques: {max_parques}")
 
     return jsonify({
         "ok": True,
@@ -636,3 +665,18 @@ def token_info(token):
         "ok": True,
         "max_parques": row["max_parques"]
     })
+
+# =========================
+# LOGS
+# =========================
+@admin_server_bp.route("/admin/logs")
+@login_required
+def visualizar_logs():
+    logs = get_logs()
+    return render_template("logs.html", logs=logs)
+
+@admin_server_bp.route("/admin/logs/api")
+@login_required
+def get_logs_api():
+    logs = get_logs()
+    return jsonify({"logs": logs})

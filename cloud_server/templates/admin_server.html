@@ -290,6 +290,12 @@ button{
                 onclick="openTab('metricas')">
             Métricas
         </button>
+
+        <button id="btn-logs"
+                class="tab-btn"
+                onclick="openTab('logs')">
+            📋 Logs
+        </button>
     </div>
 
     <!-- GESTÃO -->
@@ -654,6 +660,30 @@ button{
             <div class="card">
                 <h3>Carros Estacionados por Mês</h3>
                 <canvas id="chart-carros"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- LOGS -->
+
+    <div id="logs" class="tab-content">
+
+        <div class="card">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+
+                <h3 style="margin:0;">Histórico de Ações</h3>
+
+                <div>
+                    <button class="btn-primary" style="background:#10b981;" onclick="exportarLogs()">⬇️ Exportar</button>
+                </div>
+
+            </div>
+
+            <div style="background:#f3f4f6;padding:15px;border-radius:8px;max-height:600px;overflow-y:auto;font-family:monospace;font-size:13px;line-height:1.6;" id="logs-container">
+                <p>Carregando logs...</p>
             </div>
 
         </div>
@@ -1046,4 +1076,68 @@ function renderGraficoCarros(dados) {
         }
     });
 }
+
+/* =========================
+   LOGS
+========================= */
+function carregarLogs() {
+    fetch("/admin/logs/api")
+        .then(r => r.json())
+        .then(data => {
+            const container = document.getElementById("logs-container");
+            container.innerHTML = "";
+
+            if (data.logs.length === 0) {
+                container.innerHTML = '<div style="color:#6b7280;">Nenhum log disponível</div>';
+                return;
+            }
+
+            data.logs.forEach(log => {
+                const entry = document.createElement("div");
+                entry.style.paddingBottom = "8px";
+                entry.style.borderBottom = "1px solid #e5e7eb";
+                entry.style.color = "#374151";
+                entry.textContent = log.replace('\n', '');
+                container.appendChild(entry);
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById("logs-container").innerHTML = '<div style="color:red;">Erro ao carregar logs</div>';
+        });
+}
+
+function recarregarLogs() {
+    carregarLogs();
+}
+
+function exportarLogs() {
+    fetch("/admin/logs/api")
+        .then(r => r.json())
+        .then(data => {
+            const conteudo = data.logs.join("");
+            const blob = new Blob([conteudo], {type: "text/plain"});
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `logs_${new Date().toISOString().slice(0,10)}.txt`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Erro ao exportar logs");
+        });
+}
+
+// Carregar logs ao abrir a aba
+const originalOpenTab = window.openTab;
+window.openTab = function(tab) {
+    originalOpenTab(tab);
+    if (tab === "logs") {
+        carregarLogs();
+        setInterval(carregarLogs, 1000);
+    }
+};
+
 </script>
