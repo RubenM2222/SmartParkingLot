@@ -117,6 +117,73 @@ def admin_server():
 
 
 # =========================
+# MÉTRICAS
+# =========================
+@admin_server_bp.route("/admin/metrics")
+@login_required
+def get_metrics():
+
+    conn = db()
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    c.execute("SELECT COUNT(*) as count FROM parques")
+    total_parques = c.fetchone()["count"]
+
+    c.execute("SELECT COUNT(*) as count FROM utilizadores WHERE tipo='park_admin'")
+    total_admins = c.fetchone()["count"]
+
+    c.execute("SELECT COUNT(*) as count FROM carros WHERE ativo=1")
+    carros_estacionados = c.fetchone()["count"]
+
+    c.execute("SELECT COUNT(*) as count FROM reservas WHERE ativo=1")
+    reservas_ativas = c.fetchone()["count"]
+
+    c.execute("SELECT COALESCE(SUM(valor), 0) as total FROM pagamentos")
+    receita_total = c.fetchone()["total"]
+
+    c.execute("SELECT COUNT(*) as count FROM tokens WHERE usado=1")
+    tokens_usados = c.fetchone()["count"]
+
+    c.execute("SELECT COUNT(*) as count FROM tokens WHERE usado=0")
+    tokens_disponiveis = c.fetchone()["count"]
+
+    c.execute("""
+        SELECT
+            p.id,
+            p.nome,
+            p.capacidade,
+            COUNT(c.id) as carros_atuais
+        FROM parques p
+        LEFT JOIN carros c ON p.id = c.parque_id AND c.ativo=1
+        GROUP BY p.id
+    """)
+
+    ocupacao_parques = []
+    for parque in c.fetchall():
+        taxa = (parque["carros_atuais"] / parque["capacidade"] * 100) if parque["capacidade"] > 0 else 0
+        ocupacao_parques.append({
+            "nome": parque["nome"],
+            "ocupacao": round(taxa, 1),
+            "carros": parque["carros_atuais"],
+            "capacidade": parque["capacidade"]
+        })
+
+    conn.close()
+
+    return jsonify({
+        "total_parques": total_parques,
+        "total_admins": total_admins,
+        "carros_estacionados": carros_estacionados,
+        "reservas_ativas": reservas_ativas,
+        "receita_total": round(receita_total, 2),
+        "tokens_usados": tokens_usados,
+        "tokens_disponiveis": tokens_disponiveis,
+        "ocupacao_parques": ocupacao_parques
+    })
+
+
+# =========================
 # CRIAR PARQUE
 # =========================
 @admin_server_bp.route("/admin/parques/criar", methods=["POST"])

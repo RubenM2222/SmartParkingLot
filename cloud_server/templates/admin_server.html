@@ -128,6 +128,124 @@ button{
     border:none;
 }
 
+.metric-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.metric-card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+.metric-value{
+    font-size:32px;
+    font-weight:bold;
+    color:#2563eb;
+    margin:10px 0;
+}
+
+.metric-label{
+    font-size:14px;
+    color:#6b7280;
+}
+
+.occupancy-chart{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.occupancy-item{
+    background:#f3f4f6;
+    padding:20px;
+    border-radius:8px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.occupancy-gauge{
+    width:150px;
+    height:150px;
+    position:relative;
+    margin:10px 0;
+}
+
+.occupancy-gauge svg{
+    width:100%;
+    height:100%;
+    transform:rotate(-90deg);
+}
+
+.gauge-background{
+    fill:none;
+    stroke:#e5e7eb;
+    stroke-width:8;
+}
+
+.gauge-fill{
+    fill:none;
+    stroke-width:8;
+    stroke-linecap:round;
+    stroke-dasharray:471;
+    stroke-dashoffset:471;
+    animation:fillGauge 1.5s ease-out forwards;
+}
+
+.gauge-fill.green{
+    stroke:#10b981;
+}
+
+.gauge-fill.yellow{
+    stroke:#f59e0b;
+}
+
+.gauge-fill.red{
+    stroke:#ef4444;
+}
+
+@keyframes fillGauge {
+    to {
+        stroke-dashoffset:0;
+    }
+}
+
+.gauge-center{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+}
+
+.gauge-value{
+    font-size:28px;
+    font-weight:bold;
+    color:#2563eb;
+}
+
+.gauge-label{
+    font-size:12px;
+    color:#6b7280;
+}
+
+.occupancy-info{
+    font-size:12px;
+    color:#6b7280;
+    margin-top:10px;
+}
+
+.occupancy-title{
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
 </style>
 </head>
 
@@ -163,6 +281,12 @@ button{
                 class="tab-btn"
                 onclick="openTab('tokens')">
             Tokens
+        </button>
+
+        <button id="btn-metricas"
+                class="tab-btn"
+                onclick="openTab('metricas')">
+            Métricas
         </button>
     </div>
 
@@ -470,6 +594,56 @@ button{
 
     </div>
 
+    <!-- MÉTRICAS -->
+
+    <div id="metricas" class="tab-content">
+
+        <div class="metric-grid">
+
+            <div class="metric-card">
+                <div class="metric-label">Total de Parques</div>
+                <div class="metric-value" id="total-parques">-</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Admins</div>
+                <div class="metric-value" id="total-admins">-</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Carros Estacionados</div>
+                <div class="metric-value" id="carros-estacionados">-</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Reservas Ativas</div>
+                <div class="metric-value" id="reservas-ativas">-</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Receita Total</div>
+                <div class="metric-value" id="receita-total">-</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Tokens Disponíveis</div>
+                <div class="metric-value" id="tokens-disponivel">-</div>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Ocupação dos Parques</h3>
+
+            <div class="occupancy-chart" id="occupancy-container">
+                <p>Carregando...</p>
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
 <script>
@@ -491,6 +665,10 @@ function openTab(tab){
     document
         .getElementById("btn-" + tab)
         .classList.add("active");
+
+    if(tab === "metricas") {
+        carregarMetricas();
+    }
 }
 /* =========================
    PARQUES
@@ -717,5 +895,59 @@ function criarToken() {
         console.error(err);
         alert("Erro de comunicação");
     });
+}
+
+/* =========================
+   MÉTRICAS
+========================= */
+function carregarMetricas() {
+
+    fetch("/admin/metrics")
+        .then(r => r.json())
+        .then(data => {
+
+            document.getElementById("total-parques").textContent = data.total_parques;
+            document.getElementById("total-admins").textContent = data.total_admins;
+            document.getElementById("carros-estacionados").textContent = data.carros_estacionados;
+            document.getElementById("reservas-ativas").textContent = data.reservas_ativas;
+            document.getElementById("receita-total").textContent = "€" + data.receita_total;
+            document.getElementById("tokens-disponivel").textContent = data.tokens_disponiveis;
+
+            const occupancyContainer = document.getElementById("occupancy-container");
+            occupancyContainer.innerHTML = "";
+
+            data.ocupacao_parques.forEach(parque => {
+                const ocupacao = parque.ocupacao;
+                const fillClass = ocupacao >= 80 ? "red" : ocupacao >= 50 ? "yellow" : "green";
+
+                const raio = 75;
+                const circunferencia = 2 * Math.PI * raio;
+                const strokeDashoffset = circunferencia * (1 - ocupacao / 100);
+
+                const item = document.createElement("div");
+                item.className = "occupancy-item";
+                item.innerHTML = `
+                    <div class="occupancy-title">${parque.nome}</div>
+                    <div class="occupancy-gauge">
+                        <svg viewBox="0 0 160 160">
+                            <circle cx="80" cy="80" r="${raio}" class="gauge-background"></circle>
+                            <circle cx="80" cy="80" r="${raio}" class="gauge-fill ${fillClass}" style="stroke-dashoffset:${strokeDashoffset}"></circle>
+                        </svg>
+                        <div class="gauge-center">
+                            <div class="gauge-value">${ocupacao}%</div>
+                            <div class="gauge-label">Ocupação</div>
+                        </div>
+                    </div>
+                    <div class="occupancy-info">${parque.carros} / ${parque.capacidade} lugares</div>
+                `;
+
+                occupancyContainer.appendChild(item);
+            });
+
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById("occupancy-container").innerHTML = "<p>Erro ao carregar métricas</p>";
+        });
 }
 </script>
