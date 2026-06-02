@@ -9,12 +9,62 @@
 body{
     font-family:Arial;
     background:#f2f2f2;
-    margin:20px;
+    margin:0;
+}
+
+.header{
+    width:100%;
+    background:#1f2937;
+    color:white;
+    padding:15px 25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-sizing:border-box;
+}
+
+.container{
+    padding:20px;
 }
 
 h1,h2{
     text-align:center;
 }
+
+/* ================= TABS ================= */
+
+.tabs{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:20px 0;
+}
+
+.tab-btn{
+    background:white;
+    border:none;
+    padding:12px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    box-shadow:0 0 8px rgba(0,0,0,0.08);
+}
+
+.tab-btn.active{
+    background:#3498db;
+    color:white;
+}
+
+.tab-content{
+    display:none;
+}
+
+.tab-content.active{
+    display:block;
+}
+
+/* ================= CARDS ================= */
 
 .cards{
     display:flex;
@@ -33,17 +83,10 @@ h1,h2{
     box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
-.card h3{
-    margin:0;
-}
+.card h3{ margin:0; }
+.card h1{ margin-top:10px; }
 
-.card h1{
-    margin-top:10px;
-}
-
-.section{
-    margin-top:30px;
-}
+.section{ margin-top:20px; }
 
 table{
     width:100%;
@@ -72,20 +115,50 @@ th,td{
     margin-top:20px;
 }
 
-.btn:hover{
+.btn:hover{ background:#2980b9; }
+.back-btn{
+    background:#3498db;
+    color:white;
+    padding:10px 15px;
+    border-radius:6px;
+    text-decoration:none;
+    font-weight:bold;
+    display:inline-block;
+    transition:0.2s;
+}
+
+.back-btn:hover{
     background:#2980b9;
+    transform:translateY(-1px);
 }
-
-.actions{
-    text-align:center;
-}
-
 </style>
 </head>
 
 <body>
-
+    <div class="header">
+        <a href="/admin/park" class="back-btn">← Voltar aos Parques</a>
+        <h1>🚗 {{ parque["nome"] }}</h1>
+    </div>
+<div class="container">
 <h1>🚗 {{ parque["nome"] }}</h1>
+
+<!-- ================= TABS ================= -->
+<div class="tabs">
+    <button class="tab-btn active" onclick="openTab('overview')">📊 Visão Geral</button>
+    <button class="tab-btn" onclick="openTab('config')">⚙️ Configurações</button>
+    <button class="tab-btn" onclick="openTab('carros')">🚗 Veículos</button>
+    <button class="tab-btn" onclick="openTab('reservas')">🅿️ Reservas</button>
+    <button class="tab-btn" onclick="openTab('historico')">📜 Histórico</button>
+</div>
+
+<!-- ================= OVERVIEW ================= -->
+<div id="overview" class="tab-content active">
+
+{% if taxa_ocupacao >= 80 %}
+<div style="background:#ffdddd;color:#990000;padding:15px;border-radius:10px;margin-bottom:20px;text-align:center;font-weight:bold;">
+⚠️ Parque quase cheio ({{ taxa_ocupacao }}%)
+</div>
+{% endif %}
 
 <div class="cards">
 
@@ -110,13 +183,8 @@ th,td{
     </div>
 
     <div class="card">
-        <h3>Ocupação</h3>
-        <h1>{{ taxa_ocupacao }}%</h1>
-    </div>
-
-    <div class="card">
         <h3>Receita</h3>
-        <h1>{{ receita_total }}€</h1>
+        <h1 id="valorReceita">{{ receita_total }}€</h1>
     </div>
 
     <div class="card">
@@ -138,197 +206,131 @@ th,td{
             <h1>🔴</h1>
         {% endif %}
     </div>
+
+</div>
+<div style="background:white;padding:20px;border-radius:10px;max-width:900px;margin:0 auto;">
+    <h2>📈 Entradas por Hora</h2>
+    <canvas id="graficoEntradas"></canvas>
 </div>
 
-<div class="section">
+<div style="background:white;padding:20px;border-radius:10px;max-width:900px;margin:20px auto;">
+    <h2>💰 Receita</h2>
+    <div style="margin-bottom:15px;">
+        <label for="filtroReceitaChart">Período: </label>
+        <select id="filtroReceitaChart" onchange="atualizarGraficoReceita()">
+            <option value="daily">Últimos 30 dias</option>
+            <option value="monthly">Últimos 12 meses</option>
+            <option value="yearly">Por Ano</option>
+        </select>
+    </div>
+    <canvas id="graficoReceita"></canvas>
+</div>
+</div>
 
-    <h2>⚙️ Configurações do Parque</h2>
+<!-- ================= CONFIG ================= -->
+<div id="config" class="tab-content">
 
-    <form method="POST"
-          action="/admin/park/{{ parque['id'] }}/update">
+<h2>⚙️ Configurações do Parque</h2>
 
-        <table>
+<form method="POST" action="/admin/park/{{ parque['id'] }}/update">
 
-            <tr>
-                <td>Nome</td>
-                <td>
-                    <input
-                        type="text"
-                        name="nome"
-                        value="{{ parque['nome'] }}"
-                        required>
-                </td>
-            </tr>
+<table>
+<tr><td>Nome</td><td><input name="nome" value="{{ parque['nome'] }}"></td></tr>
+<tr><td>Localização</td><td><input name="localizacao" value="{{ parque['localizacao'] }}"></td></tr>
+<tr><td>Capacidade</td><td><input name="capacidade" type="number" value="{{ parque['capacidade'] }}"></td></tr>
+<tr><td>Preço Base</td><td><input name="preco_base" value="{{ parque['preco_base'] }}"></td></tr>
+<tr><td>Preço Min</td><td><input name="preco_min" value="{{ parque['preco_min'] }}"></td></tr>
 
-            <tr>
-                <td>Localização</td>
-                <td>
-                    <input
-                        type="text"
-                        name="localizacao"
-                        value="{{ parque['localizacao'] }}">
-                </td>
-            </tr>
+<tr>
+<td>Estado</td>
+<td>
+<select name="ativo">
+<option value="1" {% if parque["ativo"] == 1 %}selected{% endif %}>Aberto</option>
+<option value="0" {% if parque["ativo"] == 0 %}selected{% endif %}>Fechado</option>
+</select>
+</td>
+</tr>
 
-            <tr>
-                <td>Capacidade</td>
-                <td>
-                    <input
-                        type="number"
-                        name="capacidade"
-                        min="1"
-                        value="{{ parque['capacidade'] }}"
-                        required>
-                </td>
-            </tr>
+</table>
 
-            <tr>
-                <td>Preço Base (€)</td>
-                <td>
-                    <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        name="preco_base"
-                        value="{{ parque['preco_base'] }}"
-                        required>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Preço por Minuto (€)</td>
-                <td>
-                    <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        name="preco_min"
-                        value="{{ parque['preco_min'] }}"
-                        required>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Estado</td>
-                <td>
-
-                    <select name="ativo">
-
-                        <option value="1"
-                        {% if parque["ativo"] == 1 %}
-                            selected
-                        {% endif %}>
-                            Aberto
-                        </option>
-
-                        <option value="0"
-                        {% if parque["ativo"] == 0 %}
-                            selected
-                        {% endif %}>
-                            Fechado
-                        </option>
-
-                    </select>
-
-                </td>
-            </tr>
-
-        </table>
-
-        <br>
-
-        <button class="btn" type="submit">
-            Guardar Alterações
-        </button>
-
-    </form>
+<button class="btn">Guardar</button>
+</form>
 
 </div>
 
-<div class="section">
+<!-- ================= CARROS ================= -->
+<div id="carros" class="tab-content">
+<h2>🚗 Veículos Ativos</h2>
 
-    <h2>Veículos Ativos</h2>
+<table>
+<tr><th>Matrícula</th><th>Entrada</th><th>Ação</th></tr>
 
-    <table>
-
-        <tr>
-            <th>Matrícula</th>
-            <th>Entrada</th>
-             <th>Ação</th>
-        </tr>
-
-        {% for carro in carros %}
-        <tr>
-            <td>{{ carro["matricula"] }}</td>
-            <td>{{ carro["entrada"] }}</td>
-            <td>
-                <button onclick="forcarSaida('{{ carro['matricula'] }}', {{ parque.id }})">
-                Forçar Saída
-                </button>
-            </td>
-        </tr>
-        {% endfor %}
-
-    </table>
-
+{% for carro in carros %}
+<tr>
+<td>{{ carro["matricula"] }}</td>
+<td>{{ carro["entrada"] }}</td>
+<td>
+<button onclick="forcarSaida('{{ carro['matricula'] }}', {{ parque.id }})">
+Forçar Saída
+</button>
+</td>
+</tr>
+{% endfor %}
+</table>
 </div>
 
-<div class="section">
+<!-- ================= RESERVAS ================= -->
+<div id="reservas" class="tab-content">
+<h2>🅿️ Reservas Ativas</h2>
 
-    <h2>Reservas Ativas</h2>
+<table>
+<tr><th>Matrícula</th><th>Início</th><th>Expira</th></tr>
 
-    <table>
-
-        <tr>
-            <th>Matrícula</th>
-            <th>Início</th>
-            <th>Expira</th>
-        </tr>
-
-        {% for reserva in reservas %}
-        <tr>
-            <td>{{ reserva["matricula"] }}</td>
-            <td>{{ reserva["inicio"] }}</td>
-            <td>{{ reserva["expira"] }}</td>
-        </tr>
-        {% endfor %}
-
-    </table>
-
+{% for reserva in reservas %}
+<tr>
+<td>{{ reserva["matricula"] }}</td>
+<td>{{ reserva["inicio"] }}</td>
+<td>{{ reserva["expira"] }}</td>
+</tr>
+{% endfor %}
+</table>
 </div>
 
-<div class="section">
+<!-- ================= HISTÓRICO ================= -->
+<div id="historico" class="tab-content">
+<h2>📜 Histórico</h2>
 
-    <h2>Histórico Recente</h2>
+<table>
+<tr><th>Matrícula</th><th>Entrada</th><th>Saída</th><th>Preço</th></tr>
 
-    <table>
-
-        <tr>
-            <th>Matrícula</th>
-            <th>Entrada</th>
-            <th>Saída</th>
-            <th>Preço</th>
-        </tr>
-
-        {% for carro in historico %}
-        <tr>
-            <td>{{ carro["matricula"] }}</td>
-            <td>{{ carro["entrada"] }}</td>
-            <td>{{ carro["saida"] }}</td>
-            <td>{{ carro["preco"] }}€</td>
-        </tr>
-        {% endfor %}
-
-    </table>
-
+{% for carro in historico %}
+<tr>
+<td>{{ carro["matricula"] }}</td>
+<td>{{ carro["entrada"] }}</td>
+<td>{{ carro["saida"] }}</td>
+<td>{{ carro["preco"] }}€</td>
+</tr>
+{% endfor %}
+</table>
 </div>
+</div> 
 
-<div class="actions">
-    <a class="btn" href="/admin/park">
-        ← Voltar
-    </a>
-</div>
+<!-- ================= SCRIPTS ================= -->
 <script>
+
+function openTab(id){
+
+    document.querySelectorAll(".tab-content")
+        .forEach(t => t.classList.remove("active"));
+
+    document.querySelectorAll(".tab-btn")
+        .forEach(b => b.classList.remove("active"));
+
+    document.getElementById(id).classList.add("active");
+
+    event.target.classList.add("active");
+}
+
 function forcarSaida(matricula, parqueId) {
     if (!confirm(`Forçar saída de ${matricula}?`)) return;
 
@@ -343,6 +345,91 @@ function forcarSaida(matricula, parqueId) {
         location.reload();
     });
 }
+
+let graficoReceitaChart = null;
+
+function atualizarGraficoReceita() {
+    const periodo = document.getElementById("filtroReceitaChart").value;
+
+    fetch(`/admin/park/{{ parque.id }}/receita_chart?periodo=${periodo}`)
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            if (graficoReceitaChart) {
+                graficoReceitaChart.data.labels = data.labels;
+                graficoReceitaChart.data.datasets[0].data = data.totals;
+                graficoReceitaChart.update();
+            }
+        }
+    });
+}
+
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+new Chart(document.getElementById('graficoEntradas'), {
+    type: 'bar',
+    data: {
+        labels: {{ horas|tojson }},
+        datasets: [{
+            label: 'Entradas',
+            data: {{ totais|tojson }},
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+    }
+});
+
+// Initialize receita chart
+fetch(`/admin/park/{{ parque.id }}/receita_chart?periodo=daily`)
+.then(r => r.json())
+.then(data => {
+    if (data.ok) {
+        graficoReceitaChart = new Chart(document.getElementById('graficoReceita'), {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Receita (€)',
+                    data: data.totals,
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    title: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Receita (€)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+
+</script>
+
 </body>
 </html>

@@ -174,6 +174,26 @@ def park_detail(parque_id):
     """, (parque_id,))
 
     receita_total = c.fetchone()[0]
+    
+    # gráfico entradas por hora
+    c.execute("""
+        SELECT 
+        strftime('%H', entrada) as hora,
+        COUNT(*) as total
+        FROM carros
+        WHERE parque_id = ?
+        GROUP BY hora
+        ORDER BY hora
+    """, (parque_id,))
+
+    grafico = c.fetchall()
+
+    horas = []
+    totais = []
+
+    for row in grafico:
+        horas.append(f"{row['hora']}:00")
+        totais.append(row["total"])
 
     conn.close()
 
@@ -187,7 +207,9 @@ def park_detail(parque_id):
         livres=livres,
         reservados=reservados,
         taxa_ocupacao=taxa_ocupacao,
-        receita_total=receita_total
+        receita_total=receita_total,
+        horas=horas,
+        totais=totais
     )
 
 @admin_park_bp.route("/admin/park/<int:parque_id>/update",methods=["POST"])
@@ -291,7 +313,7 @@ def forcar_saida(parque_id):
 
     c.execute("""
         UPDATE carros
-        SET saida = ?, ativo = 0, preco = ?, tempo = ?, pago = 1
+        SET saida = ?, ativo = 0, preco = ?, tempo = ?, pago = 1    
         WHERE id = ?
     """, (agora.isoformat(), round(preco, 2), tempo_min, carro["id"]))
 
@@ -301,4 +323,121 @@ def forcar_saida(parque_id):
     return jsonify({
         "ok": True,
         "msg": f"Saída forçada — {tempo_min} min — {round(preco,2)}€"
+    })
+    
+@admin_park_bp.route("/admin/park/<int:parque_id>/receita")
+@login_required
+def receita_periodo(parque_id):
+
+    periodo = request.args.get("periodo", "total")
+
+    conn = db()
+    c = conn.cursor()
+
+    filtro = ""
+
+    if periodo == "dia":
+        filtro = "AND date(pg.data) = date('now')"
+
+    elif periodo == "semana":
+        filtro = "AND pg.data >= datetime('now', '-7 days')"
+
+    elif periodo == "mes":
+        filtro = "AND pg.data >= datetime('now', '-30 days')"
+
+    query = f"""
+        SELECT COALESCE(SUM(pg.valor), 0)
+        FROM pagamentos pg
+        JOIN carros c
+            ON c.id = pg.carro_id
+        WHERE c.parque_id = ?
+        {filtro}
+    """
+
+    c.execute(query, (parque_id,))
+
+    total = round(c.fetchone()[0], 2)
+
+    conn.close()
+
+    return jsonify({
+        "ok": True,
+        "total": total
+    })
+
+@admin_park_bp.route("/admin/park/<int:parque_id>/receita_chart")
+@login_required
+def receita_chart(parque_id):
+
+    periodo = request.args.get("periodo", "daily")
+
+    conn = db()
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    labels = []
+    totals = []
+
+    if periodo == "daily":
+        # Last 30 days
+        c.execute("""
+            SELECT 
+                date(pg.data) as data,
+                COALESCE(SUM(pg.valor), 0) as total
+            FROM pagamentos pg
+            JOIN carros c ON c.id = pg.carro_id
+            WHERE c.parque_id = ?
+            AND pg.data >= datetime('now', '-30 days')
+            GROUP BY date(pg.data)
+            ORDER BY data
+        """, (parque_id,))
+
+        rows = c.fetchall()
+        for row in rows:
+            labels.append(row['data'])
+            totals.append(round(row['total'], 2))
+
+    elif periodo == "monthly":
+        # Last 12 months
+        c.execute("""
+            SELECT 
+                strftime('%Y-%m', pg.data) as mes,
+                COALESCE(SUM(pg.valor), 0) as total
+            FROM pagamentos pg
+            JOIN carros c ON c.id = pg.carro_id
+            WHERE c.parque_id = ?
+            AND pg.data >= datetime('now', '-365 days')
+            GROUP BY strftime('%Y-%m', pg.data)
+            ORDER BY mes
+        """, (parque_id,))
+
+        rows = c.fetchall()
+        for row in rows:
+            labels.append(row['mes'])
+            totals.append(round(row['total'], 2))
+
+    elif periodo == "yearly":
+        # All years
+        c.execute("""
+            SELECT 
+                strftime('%Y', pg.data) as ano,
+                COALESCE(SUM(pg.valor), 0) as total
+            FROM pagamentos pg
+            JOIN carros c ON c.id = pg.carro_id
+            WHERE c.parque_id = ?
+            GROUP BY strftime('%Y', pg.data)
+            ORDER BY ano
+        """, (parque_id,))
+
+        rows = c.fetchall()
+        for row in rows:
+            labels.append(row['ano'])
+            totals.append(round(row['total'], 2))
+
+    conn.close()
+
+    return jsonify({
+        "ok": True,
+        "labels": labels,
+        "totals": totals
     })

@@ -76,9 +76,9 @@ def entrada(parque_id):
             WHERE id = ?
         """, (reserva[0],))
 
-    # capacidade do parque
+    # verificar parque
     c.execute("""
-        SELECT capacidade
+        SELECT capacidade, ativo
         FROM parques
         WHERE id = ?
     """, (parque_id,))
@@ -86,6 +86,7 @@ def entrada(parque_id):
     parque = c.fetchone()
 
     if not parque:
+
         conn.close()
 
         return jsonify({
@@ -94,6 +95,17 @@ def entrada(parque_id):
         }), 404
 
     capacidade = parque[0]
+    ativo = parque[1]
+
+    # parque fechado
+    if ativo == 0:
+
+        conn.close()
+
+        return jsonify({
+            "ok": False,
+            "msg": "Parque encerrado"
+        }), 403
 
     # ocupados
     c.execute("""
