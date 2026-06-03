@@ -97,6 +97,7 @@ python app.py
 
 ## 📁 Estrutura do projeto
 
+!! MUDAR ESTA PARTE !!!
 ```text
 project/
 ├── app.py / server.py
