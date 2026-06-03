@@ -1,99 +1,113 @@
-# Projeto Flask + OCR (Python)
+# 📷 Flask + OCR Parking System
 
-Estou a utilizar Flask para o Python e comunicação via HTTP.  
-A base de dados está em SQLite.
-
----
-
-## 📦 Instalação de dependências
-
-pip3 install flask pytesseract opencv-python pillow  
-pip3 install flask-cors  
+Sistema de gestão de parque com **Flask**, **OCR (Tesseract)** e base de dados **SQLite**.  
+Permite leitura de matrículas/imagens, gestão de acessos e integração via HTTP.
 
 ---
 
-## ▶️ Executar o servidor
+## 🚀 Tecnologias
 
-python server.py
-python app.py  
-
----
-
-## 🌐 Frontend (HTML)
-
-O Flask já serve o HTML, por isso não é necessário usar:
-
-python -m http.server 8000 
-
-Usar /admin?key=admin123 para aceder ao dashboard admin(ja nao é necessario)
+- Python 3
+- Flask
+- Flask-CORS
+- Tesseract OCR
+- OpenCV
+- SQLite
+- Raspberry Pi / Cloud VM support
 
 ---
 
-## 🔧 Instalar Tesseract OCR (Windows)
+## 📦 Instalação
 
-Download:  
-https://github.com/UB-Mannheim/tesseract/wiki  
+### Instalar dependências principais
 
-Instalar normalmente no Windows.
+```bash
+pip install flask flask-cors pytesseract opencv-python pillow numpy requests
+```
 
----
+## 🔧 Instalar Tesseract OCR
 
-## 📍 Caminho do Tesseract
+### 🪟 Windows
 
-Exemplo:
+Download:
+https://github.com/UB-Mannheim/tesseract/wiki
 
-C:\Program Files\Tesseract-OCR\tesseract.exe  
+Instalar normalmente.
 
----
+Depois configurar no `server.py`:
 
-## ⚙️ Configurar no server.py
+```python
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+```
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  
+### 🐧 Linux / Raspberry Pi
 
----
-
-## ☁️ Servidor em Cloud (VM)
-
-python app.py  
-
----
-
-## 🍓 Raspberry Pi
-
-sudo apt install tesseract-ocr 
-
-(nao me lembro se preciso do pillow)pip3 install flask flask-cors pytesseract opencv-python pillow 
-
-pip install Flask flask-cors pytesseract opencv-python numpy requests
-
-python3 server.py 
-
-### No rapsberry
-Install venv support if needed
+```bash
 sudo apt update
-sudo apt install python3-venv python3-full
+sudo apt install tesseract-ocr
+```
 
-Create a virtual environment
-python3 -m venv ~/edge_iot_pi
+## ▶️ Executar o projeto
 
-Activate it
-source ~/edge_iot_pi/bin/activate
-
-Upgrade pip
-pip install --upgrade pip
-
-Install your packages
-pip install Flask flask-cors pytesseract opencv-python numpy requests
-
-sudo apt install tesseract-ocr 
-
-**after**
-cd ~/edge_iot_pi
-source venv/bin/activate
+```bash
 python server.py
+```
 
+ou
 
-# Importante
+```bash
+python app.py
+```
 
-para aceder ao pagamento tem de ser 
-http://ip:5001/pagamento?parque_id=1
+## 💳 Endpoint de pagamento
+
+http://IP_DO_Edge_iot_pi:5001/pagamento?parque_id=1
+
+## 🍓 Raspberry Pi (Deploy)
+
+Instalar dependências do sistema
+
+```bash
+sudo apt update
+sudo apt install python3-venv python3-full tesseract-ocr
+```
+
+Criar ambiente virtual
+```bash
+python3 -m venv ~/edge_iot_pi
+source ~/edge_iot_pi/bin/activate
+```
+
+Instalar dependências Python
+```bash
+pip install --upgrade pip
+pip install flask flask-cors pytesseract opencv-python numpy requests pillow
+```
+
+Executar servidor
+```bash
+python server.py
+```
+
+## ☁️ Cloud / VM
+
+```bash
+python app.py
+```
+
+## 📁 Estrutura do projeto
+
+project/
+├── app.py / server.py
+├── database.db
+├── templates/
+├── static/
+├── utils/
+└── README.md
+
+## 🧠 Notas importantes
+- Tesseract é obrigatório para OCR funcionar
+- SQLite é usado como base de dados local
+- Flask serve backend do sistema
+- Raspberry Pi deve usar sempre venv
+- Apenas um ficheiro deve iniciar o servidor
