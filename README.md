@@ -97,6 +97,7 @@ python app.py
 
 ## 📁 Estrutura do projeto
 
+```text
 project/
 ├── app.py / server.py
 ├── database.db
@@ -104,6 +105,8 @@ project/
 ├── static/
 ├── utils/
 └── README.md
+```
+---
 
 ## 🧠 Notas importantes
 - Tesseract é obrigatório para OCR funcionar
